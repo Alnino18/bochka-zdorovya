@@ -1,0 +1,585 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// This security rules file assumes the following data structures for the
+// "Бочка Здоровья" salon management application:
+//
+// Collection: catalog
+// Document ID: categoryId (e.g., 'cat-1', 'cat-2')
+// Fields:
+//   - id: string (required, 1-50 chars, immutable) - category identifier
+//   - categoryNumber: int (required, 1-100) - catalog display order
+//   - nameRu: string (required, 1-200 chars) - category name in Russian
+//   - nameUz: string (required, 1-200 chars) - category name in Uzbek
+//   - descriptionRu: string (optional, 0-1000 chars) - description in Russian
+//   - descriptionUz: string (optional, 0-1000 chars) - description in Uzbek
+//   - posterItems: list of numbers (optional, max 20 items) - cross-reference items
+//   - options: list of maps (required, 1-20 items) - duration & price tiers
+//   - updatedAt: timestamp (optional)
+//   - updatedBy: string (optional, max 128 chars)
+//
+// Collection: business_contacts
+// Document ID: contactId (e.g., 'main')
+// Fields:
+//   - nameRu: string (optional, max 100 chars)
+//   - nameUz: string (optional, max 100 chars)
+//   - phone: string (required, 3-30 chars) - primary phone number
+//   - phoneFormatted: string (required, 3-30 chars) - formatted phone
+//   - phoneTel: string (required, 3-50 chars) - tel: URI
+//   - instagram: string (required, 1-50 chars) - Instagram handle
+//   - instagramUrl: string (required, valid http/https URL, max 200 chars)
+//   - phoneDisplay: string (optional, max 30 chars)
+//   - phoneFull: string (optional, max 30 chars)
+//   - phoneTelUri: string (optional, max 50 chars)
+//   - phoneLocalTelUri: string (optional, max 50 chars)
+//   - instagramHandle: string (optional, max 50 chars)
+//   - updatedAt: timestamp (optional)
+//   - updatedBy: string (optional, max 128 chars)
+//
+// Collection: daily_records
+// Document ID: recordId (e.g., 'journal-2026-11-19' or '2026-11-19')
+// Fields:
+//   - id: string (required, 1-50 chars, immutable) - unique journal ID
+//   - date: string (required, YYYY-MM-DD format, immutable) - operational date
+//   - dateFormatted: string (required, DD.MM.YYYY format) - display date
+//   - notes: string (optional, max 2000 chars) - daily notes
+//   - expenses: map (required, keys: cleaning, other, optional description)
+//   - bar: map (required, keys: revenue, optional items, optional notes)
+//   - masters: list of maps (optional, max 50 items) - master shift summaries
+//   - bookings: list of maps (optional, max 100 items) - client bookings
+//   - createdAt: timestamp (optional, immutable)
+//   - updatedAt: timestamp (optional)
+//   - updatedBy: string (optional, max 128 chars)
+//
+// Collection: masters
+// Document ID: masterId (e.g., 'm-iro', 'm-max', 'm-komila')
+// Fields:
+//   - id: string (required, 1-50 chars, immutable) - staff master ID
+//   - name: string (required, 1-100 chars) - master name (RU)
+//   - nameUz: string (optional, max 100 chars) - master name (UZ)
+//   - phone: string (optional, max 30 chars) - contact phone
+//   - active: bool (required) - whether master is currently active
+//   - standardPayoutRate: number (optional, >= 0, <= 50,000,000) - standard share rate
+//   - specialPayoutRate: number (optional, >= 0, <= 50,000,000) - special share rate
+//   - notes: string (optional, max 500 chars)
+//   - createdAt: timestamp (optional, immutable)
+//   - updatedAt: timestamp (optional)
+//   - updatedBy: string (optional, max 128 chars)
+//
+// Collection: bookings
+// Document ID: bookingId (e.g., 'b-nov19-1')
+// Fields:
+//   - id: string (required, 1-50 chars, immutable) - appointment ID
+//   - date: string (required, YYYY-MM-DD format) - booking date
+//   - time: string (required, HH:MM format, max 10 chars) - appointment time
+//   - phone: string (required, 5-30 chars) - client phone number
+//   - clientName: string (optional, max 100 chars) - client name or tag
+//   - partySize: int (required, 1-50) - number of people in party
+//   - notes: string (optional, max 500 chars) - booking notes
+//   - completed: bool (required) - completion status
+//   - masterId: string (optional, max 50 chars) - assigned master
+//   - serviceId: string (optional, max 50 chars) - service selected
+//   - createdAt: timestamp (optional, immutable)
+//   - updatedAt: timestamp (optional)
+//   - updatedBy: string (optional, max 128 chars)
+//
+// Collection: facility_expenses
+// Document ID: expenseId
+// Fields:
+//   - id: string (required, 1-50 chars, immutable) - expense ID
+//   - date: string (required, YYYY-MM-DD format) - date incurred
+//   - category: string (required, 'cleaning'|'other'|'supplies'|'utility')
+//   - amount: number (required, >= 0, <= 100,000,000) - amount in UZS
+//   - description: string (optional, max 500 chars) - notes
+//   - createdAt: timestamp (optional, immutable)
+//   - updatedAt: timestamp (optional)
+//   - updatedBy: string (optional, max 128 chars)
+//
+// Collection: bar_sales
+// Document ID: saleId
+// Fields:
+//   - id: string (required, 1-50 chars, immutable) - sale ID
+//   - date: string (required, YYYY-MM-DD format) - date of sale
+//   - revenue: number (required, >= 0, <= 100,000,000) - gross bar revenue in UZS
+//   - notes: string (optional, max 500 chars) - item breakdown notes
+//   - items: list of maps (optional, max 50 items) - itemized sales
+//   - createdAt: timestamp (optional, immutable)
+//   - updatedAt: timestamp (optional)
+//   - updatedBy: string (optional, max 128 chars)
+//
+// Collection: users
+// Document ID: userId (matches request.auth.uid)
+// Fields:
+//   - id: string (required, matches userId, immutable)
+//   - email: string (required, valid email, immutable for user)
+//   - displayName: string (required, 1-100 chars)
+//   - role: string (required, 'admin'|'manager'|'staff', immutable for user)
+//   - createdAt: timestamp (optional, immutable)
+//   - updatedAt: timestamp (optional)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user owns the document by matching userId to auth.uid
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if user is owner based on document's uid field
+    function isDocOwner() {
+      return isAuthenticated() &&
+             ('uid' in resource.data) &&
+             request.auth.uid == resource.data.uid;
+    }
+
+    // Verify UID hasn't been tampered with on create
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+             request.resource.data.uid == request.auth.uid;
+    }
+
+    // Ensure uid field is not modified on update
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+             request.resource.data.uid == resource.data.uid;
+    }
+
+    // Validate that document has all required fields
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // Validate that document contains only allowed fields
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // Validate that immutable fields have not been modified
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Validate string length
+    function validStringLength(field, minLen, maxLen) {
+      return (field in request.resource.data) &&
+             request.resource.data[field] is string &&
+             request.resource.data[field].size() >= minLen &&
+             request.resource.data[field].size() <= maxLen;
+    }
+
+    // Validate optional string (if present, must be string within limits)
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    // Validate optional string inside a map
+    function isValidOptionalMapString(mapData, field, minLen, maxLen) {
+      return !(field in mapData) ||
+             (mapData[field] is string &&
+              mapData[field].size() >= minLen &&
+              mapData[field].size() <= maxLen);
+    }
+
+    // Validate URL format (http/https)
+    function isValidUrl(url) {
+      return url is string &&
+             url.size() <= 200 &&
+             (url.matches('^https://.*') || url.matches('^http://.*'));
+    }
+
+    // Validate email format
+    function isValidEmail(email) {
+      return email is string &&
+             email.size() <= 254 &&
+             email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Validate date string in YYYY-MM-DD format
+    function isValidDateString(dateStr) {
+      return dateStr is string &&
+             dateStr.size() == 10 &&
+             dateStr.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    // Validate formatted date string in DD.MM.YYYY format
+    function isValidFormattedDate(dateStr) {
+      return dateStr is string &&
+             dateStr.size() == 10 &&
+             dateStr.matches('^[0-9]{2}\\.[0-9]{2}\\.[0-9]{4}$');
+    }
+
+    // Validate time string in HH:MM format
+    function isValidTimeString(timeStr) {
+      return timeStr is string &&
+             timeStr.size() <= 10 &&
+             timeStr.matches('^[0-9]{1,2}:[0-9]{2}$');
+    }
+
+    // Validate non-negative financial amount
+    function isNonNegativeNumber(num) {
+      return (num is int || num is float) &&
+             num >= 0 &&
+             num <= 100000000;
+    }
+
+    // Validate list bounds
+    function isValidList(lst, maxSize) {
+      return lst is list && lst.size() <= maxSize;
+    }
+
+    // Validate map keys
+    function isValidMap(mapData, allowedKeys) {
+      return mapData is map && mapData.keys().hasOnly(allowedKeys);
+    }
+
+    // Check if timestamp is recent (within 5 minutes)
+    function isRecent(time) {
+      return time is timestamp &&
+             time > request.time - duration.value(5, 'm') &&
+             time <= request.time;
+    }
+
+    // Check if authenticated user has Administrator privileges
+    function isAdmin() {
+      return isAuthenticated() && (
+        ('admin' in request.auth.token && request.auth.token.admin == true) ||
+        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // Check if authenticated user has Salon Staff privileges (Admin, Manager, or Staff)
+    function isStaff() {
+      return isAuthenticated() && (
+        isAdmin() ||
+        ('role' in request.auth.token && (request.auth.token.role in ['manager', 'staff'])) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['manager', 'staff']))
+      );
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    // Validator for User documents
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['id', 'email', 'displayName', 'role', 'createdAt', 'updatedAt']) &&
+             hasRequiredFields(['id', 'email', 'displayName', 'role']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+             isValidEmail(data.email) &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+             data.role in ['admin', 'manager', 'staff'] &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    // Validator for Catalog Category documents
+    function isValidCatalogCategory(data) {
+      return hasOnlyAllowedFields(['id', 'categoryNumber', 'nameRu', 'nameUz', 'descriptionRu', 'descriptionUz', 'posterItems', 'options', 'updatedAt', 'updatedBy']) &&
+             hasRequiredFields(['id', 'categoryNumber', 'nameRu', 'nameUz', 'options']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 50 &&
+             data.categoryNumber is int && data.categoryNumber >= 1 && data.categoryNumber <= 100 &&
+             data.nameRu is string && data.nameRu.size() >= 1 && data.nameRu.size() <= 200 &&
+             data.nameUz is string && data.nameUz.size() >= 1 && data.nameUz.size() <= 200 &&
+             isValidOptionalString('descriptionRu', 0, 1000) &&
+             isValidOptionalString('descriptionUz', 0, 1000) &&
+             (!('posterItems' in data) || (data.posterItems is list && data.posterItems.size() <= 20)) &&
+             data.options is list && data.options.size() >= 1 && data.options.size() <= 20 &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             isValidOptionalString('updatedBy', 0, 128);
+    }
+
+    // Validator for Business Contacts document
+    function isValidBusinessContacts(data) {
+      return hasOnlyAllowedFields(['nameRu', 'nameUz', 'phone', 'phoneFormatted', 'phoneTel', 'instagram', 'instagramUrl', 'phoneDisplay', 'phoneFull', 'phoneTelUri', 'phoneLocalTelUri', 'instagramHandle', 'updatedAt', 'updatedBy']) &&
+             hasRequiredFields(['phone', 'phoneFormatted', 'phoneTel', 'instagram', 'instagramUrl']) &&
+             isValidOptionalString('nameRu', 0, 100) &&
+             isValidOptionalString('nameUz', 0, 100) &&
+             data.phone is string && data.phone.size() >= 3 && data.phone.size() <= 30 &&
+             data.phoneFormatted is string && data.phoneFormatted.size() >= 3 && data.phoneFormatted.size() <= 30 &&
+             data.phoneTel is string && data.phoneTel.size() >= 3 && data.phoneTel.size() <= 50 &&
+             data.instagram is string && data.instagram.size() >= 1 && data.instagram.size() <= 50 &&
+             isValidUrl(data.instagramUrl) &&
+             isValidOptionalString('phoneDisplay', 0, 30) &&
+             isValidOptionalString('phoneFull', 0, 30) &&
+             isValidOptionalString('phoneTelUri', 0, 50) &&
+             isValidOptionalString('phoneLocalTelUri', 0, 50) &&
+             isValidOptionalString('instagramHandle', 0, 50) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             isValidOptionalString('updatedBy', 0, 128);
+    }
+
+    // Validator for Daily Expenses map in a Day Record
+    function isValidDayExpensesMap(exp) {
+      return exp is map &&
+             exp.keys().hasAll(['cleaning', 'other']) &&
+             exp.keys().hasOnly(['cleaning', 'other', 'description']) &&
+             isNonNegativeNumber(exp.cleaning) &&
+             isNonNegativeNumber(exp.other) &&
+             isValidOptionalMapString(exp, 'description', 0, 500);
+    }
+
+    // Validator for Bar Sales map in a Day Record
+    function isValidBarSalesMap(bar) {
+      return bar is map &&
+             bar.keys().hasAll(['revenue']) &&
+             bar.keys().hasOnly(['revenue', 'items', 'notes']) &&
+             isNonNegativeNumber(bar.revenue) &&
+             isValidOptionalMapString(bar, 'notes', 0, 500) &&
+             (!('items' in bar) || (bar.items is list && bar.items.size() <= 50));
+    }
+
+    // Validator for Daily Accounting Record documents
+    function isValidDayRecord(data) {
+      return hasOnlyAllowedFields(['id', 'date', 'dateFormatted', 'notes', 'expenses', 'bar', 'masters', 'bookings', 'createdAt', 'updatedAt', 'updatedBy']) &&
+             hasRequiredFields(['id', 'date', 'dateFormatted', 'expenses', 'bar']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 50 &&
+             isValidDateString(data.date) &&
+             isValidFormattedDate(data.dateFormatted) &&
+             isValidOptionalString('notes', 0, 2000) &&
+             isValidDayExpensesMap(data.expenses) &&
+             isValidBarSalesMap(data.bar) &&
+             (!('masters' in data) || (data.masters is list && data.masters.size() <= 50)) &&
+             (!('bookings' in data) || (data.bookings is list && data.bookings.size() <= 100)) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             isValidOptionalString('updatedBy', 0, 128);
+    }
+
+    // Validator for Master Profile documents
+    function isValidMasterProfile(data) {
+      return hasOnlyAllowedFields(['id', 'name', 'nameUz', 'phone', 'active', 'standardPayoutRate', 'specialPayoutRate', 'notes', 'createdAt', 'updatedAt', 'updatedBy']) &&
+             hasRequiredFields(['id', 'name', 'active']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 50 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             isValidOptionalString('nameUz', 0, 100) &&
+             isValidOptionalString('phone', 0, 30) &&
+             data.active is bool &&
+             (!('standardPayoutRate' in data) || isNonNegativeNumber(data.standardPayoutRate)) &&
+             (!('specialPayoutRate' in data) || isNonNegativeNumber(data.specialPayoutRate)) &&
+             isValidOptionalString('notes', 0, 500) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             isValidOptionalString('updatedBy', 0, 128);
+    }
+
+    // Validator for Master Day Entry in subcollections
+    function isValidDayMaster(data) {
+      return hasOnlyAllowedFields(['id', 'name', 'nameUz', 'clientCount', 'revenue', 'payout', 'salonShare', 'clientSessions', 'createdAt', 'updatedAt']) &&
+             hasRequiredFields(['id', 'name', 'clientCount', 'revenue', 'payout', 'salonShare']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 50 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             isValidOptionalString('nameUz', 0, 100) &&
+             data.clientCount is int && data.clientCount >= 0 && data.clientCount <= 1000 &&
+             isNonNegativeNumber(data.revenue) &&
+             isNonNegativeNumber(data.payout) &&
+             (data.salonShare is int || data.salonShare is float) &&
+             data.salonShare >= -100000000 && data.salonShare <= 100000000 &&
+             (!('clientSessions' in data) || (data.clientSessions is list && data.clientSessions.size() <= 100)) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    // Validator for Booking / Appointment documents
+    function isValidBooking(data) {
+      return hasOnlyAllowedFields(['id', 'date', 'time', 'phone', 'clientName', 'partySize', 'notes', 'completed', 'masterId', 'serviceId', 'createdAt', 'updatedAt', 'updatedBy']) &&
+             hasRequiredFields(['id', 'date', 'time', 'phone', 'partySize', 'completed']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 50 &&
+             isValidDateString(data.date) &&
+             isValidTimeString(data.time) &&
+             data.phone is string && data.phone.size() >= 5 && data.phone.size() <= 30 &&
+             isValidOptionalString('clientName', 0, 100) &&
+             data.partySize is int && data.partySize >= 1 && data.partySize <= 50 &&
+             isValidOptionalString('notes', 0, 500) &&
+             data.completed is bool &&
+             isValidOptionalString('masterId', 0, 50) &&
+             isValidOptionalString('serviceId', 0, 50) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             isValidOptionalString('updatedBy', 0, 128);
+    }
+
+    // Validator for Facility Expense documents
+    function isValidFacilityExpense(data) {
+      return hasOnlyAllowedFields(['id', 'date', 'category', 'amount', 'description', 'createdAt', 'updatedAt', 'updatedBy']) &&
+             hasRequiredFields(['id', 'date', 'category', 'amount']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 50 &&
+             isValidDateString(data.date) &&
+             data.category in ['cleaning', 'other', 'supplies', 'utility'] &&
+             isNonNegativeNumber(data.amount) &&
+             isValidOptionalString('description', 0, 500) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             isValidOptionalString('updatedBy', 0, 128);
+    }
+
+    // Validator for Bar Sale documents
+    function isValidBarSale(data) {
+      return hasOnlyAllowedFields(['id', 'date', 'revenue', 'notes', 'items', 'createdAt', 'updatedAt', 'updatedBy']) &&
+             hasRequiredFields(['id', 'date', 'revenue']) &&
+             data.id is string && data.id.size() >= 1 && data.id.size() <= 50 &&
+             isValidDateString(data.date) &&
+             isNonNegativeNumber(data.revenue) &&
+             isValidOptionalString('notes', 0, 500) &&
+             (!('items' in data) || (data.items is list && data.items.size() <= 50)) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             isValidOptionalString('updatedBy', 0, 128);
+    }
+
+    // ===============================================================
+    // Root Rule: Default Deny All Access
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ===============================================================
+    // 1. Price Catalog & Contacts (Public Read-Only)
+    // ===============================================================
+    match /catalog/{categoryId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidCatalogCategory(request.resource.data);
+      allow update: if isAdmin() && isValidCatalogCategory(request.resource.data) && areImmutableFieldsUnchanged(['id']);
+      allow delete: if isAdmin();
+
+      match /options/{optionId} {
+        allow read: if true;
+        allow create, update, delete: if isAdmin();
+      }
+    }
+
+    match /price_catalog/{catalogId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /business_contacts/{contactId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidBusinessContacts(request.resource.data);
+      allow update: if isAdmin() && isValidBusinessContacts(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // 2. Salon Daily Accounting Journal
+    // ===============================================================
+    match /daily_records/{recordId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidDayRecord(request.resource.data);
+      allow update: if isStaff() && isValidDayRecord(request.resource.data) && areImmutableFieldsUnchanged(['id', 'date', 'createdAt']);
+      allow delete: if isAdmin();
+
+      // Subcollections for fine-grained daily operations
+      match /masters/{masterId} {
+        allow read: if isStaff();
+        allow create: if isStaff() && isValidDayMaster(request.resource.data);
+        allow update: if isStaff() && isValidDayMaster(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+        allow delete: if isStaff();
+      }
+
+      match /bookings/{bookingId} {
+        allow read: if isStaff();
+        allow create: if isStaff() && isValidBooking(request.resource.data);
+        allow update: if isStaff() && isValidBooking(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+        allow delete: if isStaff();
+      }
+
+      match /expenses/{expenseId} {
+        allow read: if isStaff();
+        allow create: if isStaff() && isValidFacilityExpense(request.resource.data);
+        allow update: if isStaff() && isValidFacilityExpense(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+        allow delete: if isStaff();
+      }
+
+      match /bar_sales/{saleId} {
+        allow read: if isStaff();
+        allow create: if isStaff() && isValidBarSale(request.resource.data);
+        allow update: if isStaff() && isValidBarSale(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+        allow delete: if isStaff();
+      }
+    }
+
+    // ===============================================================
+    // 3. Masters / Staff Directory
+    // ===============================================================
+    match /masters/{masterId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidMasterProfile(request.resource.data);
+      allow update: if isStaff() && isValidMasterProfile(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // 4. Bookings / Appointments Registry
+    // ===============================================================
+    match /bookings/{bookingId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidBooking(request.resource.data);
+      allow update: if isStaff() && isValidBooking(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+      allow delete: if isStaff();
+    }
+
+    // ===============================================================
+    // 5. Facility Expenses (Cleaning & Petty Expenses)
+    // ===============================================================
+    match /facility_expenses/{expenseId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidFacilityExpense(request.resource.data);
+      allow update: if isStaff() && isValidFacilityExpense(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // 6. Bar Sales Registry
+    // ===============================================================
+    match /bar_sales/{saleId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidBarSale(request.resource.data);
+      allow update: if isStaff() && isValidBarSale(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // 7. Users / Staff Profiles & RBAC
+    // ===============================================================
+    match /users/{userId} {
+      // User can read their own profile; admins can read all profiles
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Admins can create any user; regular users can only register their own profile with 'staff' role
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (
+        isAdmin() ||
+        (isOwner(userId) && request.resource.data.id == userId && request.resource.data.role == 'staff')
+      );
+
+      // Admins can update any user; users can update their profile but CANNOT escalate roles or change email/id/createdAt
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (
+        isAdmin() ||
+        (isOwner(userId) && areImmutableFieldsUnchanged(['id', 'email', 'role', 'createdAt']))
+      );
+
+      // Only administrators can delete user accounts
+      allow delete: if isAdmin();
+    }
+  }
+}
