@@ -4,7 +4,7 @@ export const translations: TranslationsRecord = {
   ru: {
     app: {
       title: "Бочка Здоровья",
-      subtitle: "Оздоровительный спа-комплекс и массажный салон",
+      subtitle: "Терминал заказов и кассовый учет",
       installApp: "Установить приложение",
       installed: "Приложение установлено",
       offline: "Офлайн-режим: данные сохраняются локально",
@@ -99,12 +99,39 @@ export const translations: TranslationsRecord = {
       cat6: "Лечебный массаж",
       cat7: "Хиромассаж",
       cat8: "Комбинированный массаж"
+    },
+    pos: {
+      title: "POS Терминал заказов (Касса)",
+      step1: "1. Выберите мастера",
+      step2: "2. Выберите услугу",
+      step3: "3. Подтвердить заказ",
+      selectMaster: "Выберите мастера смены",
+      selectService: "Выберите категорию и длительность",
+      addOrder: "Добавить заказ / Qabul qilish",
+      addOrderSuccess: "Заказ оформлен!",
+      orderAddedToMaster: "Заказ добавлен мастеру",
+      activeShift: "Смена",
+      activeMasters: "Мастера на смене",
+      noMastersOnShift: "Нет активных мастеров на смене. Добавьте первого мастера!",
+      quickAddMaster: "+ Новый мастер",
+      customAmount: "Произвольная сумма",
+      customAmountPlaceholder: "Сумма в тыс. сум (напр. 350)",
+      itemizedBreakdown: "Выполненные массажи (детализация)",
+      massagesList: "Список процедур",
+      performedServices: "Оказанные услуги",
+      quickBarSales: "Быстрый бар",
+      quickCleaning: "Расходы на уборку",
+      clientsTotal: "Всего клиентов",
+      servicesTotal: "Всего услуг",
+      netCash: "Остаток в кассе",
+      undoOrder: "Отменить",
+      durationMin: "мин"
     }
   },
   uz: {
     app: {
       title: "Bochka Zdorovya",
-      subtitle: "Salomatlik spa-markazi va massaj saloni",
+      subtitle: "Buyurtma terminali va kassa hisobi",
       installApp: "Ilovani o'rnatish",
       installed: "Ilova o'rnatilgan",
       offline: "Oflayn rejim: ma'lumotlar xotirada saqlanadi",
@@ -199,6 +226,33 @@ export const translations: TranslationsRecord = {
       cat6: "Davolovchi massaj",
       cat7: "Xiromassaj",
       cat8: "Kombinatsiyalangan massaj"
+    },
+    pos: {
+      title: "POS Buyurtma terminali (Kassa)",
+      step1: "1. Ustanı tanlang",
+      step2: "2. Xizmatni tanlang",
+      step3: "3. Buyurtmani tasdiqlash",
+      selectMaster: "Smena ustasini tanlang",
+      selectService: "Toifa va davomiylikni tanlang",
+      addOrder: "Qabul qilish / Buyurtma qo'shish",
+      addOrderSuccess: "Buyurtma qabul qilindi!",
+      orderAddedToMaster: "Buyurtma ustaga biriktirildi",
+      activeShift: "Smena",
+      activeMasters: "Smenadagi ustalar",
+      noMastersOnShift: "Smenada faol ustalar yo'q. Yangi usta qo'shing!",
+      quickAddMaster: "+ Yangi usta",
+      customAmount: "Boshqa summa",
+      customAmountPlaceholder: "Summa ming so'mda (masalan: 350)",
+      itemizedBreakdown: "Bajarilgan massajlar (batafsil)",
+      massagesList: "Muolajalar ro'yxati",
+      performedServices: "Ko'rsatilgan xizmatlar",
+      quickBarSales: "Tezkor bar",
+      quickCleaning: "Tozalash xarajatlari",
+      clientsTotal: "Jami mijozlar",
+      servicesTotal: "Jami xizmatlar",
+      netCash: "Kassadagi sof qoldiq",
+      undoOrder: "Bekor qilish",
+      durationMin: "daq"
     }
   }
 };

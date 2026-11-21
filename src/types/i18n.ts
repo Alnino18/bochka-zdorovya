@@ -105,12 +105,41 @@ export interface ServiceNamesTranslations {
   cat8: string;
 }
 
+export interface PosTranslations {
+  title: string;
+  step1: string;
+  step2: string;
+  step3: string;
+  selectMaster: string;
+  selectService: string;
+  addOrder: string;
+  addOrderSuccess: string;
+  orderAddedToMaster: string;
+  activeShift: string;
+  activeMasters: string;
+  noMastersOnShift: string;
+  quickAddMaster: string;
+  customAmount: string;
+  customAmountPlaceholder: string;
+  itemizedBreakdown: string;
+  massagesList: string;
+  performedServices: string;
+  quickBarSales: string;
+  quickCleaning: string;
+  clientsTotal: string;
+  servicesTotal: string;
+  netCash: string;
+  undoOrder: string;
+  durationMin: string;
+}
+
 export interface TranslationDictionary {
   app: AppTranslations;
   nav: NavTranslations;
   priceList: PriceListTranslations;
   journal: JournalTranslations;
   services: ServiceNamesTranslations;
+  pos?: PosTranslations;
 }
 
 export type TranslationsRecord = Record<Language, TranslationDictionary>;

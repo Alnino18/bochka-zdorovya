@@ -142,16 +142,10 @@ describe('Milestone M2: Service Catalog & Price List View', () => {
       // Check Category 8 Russian title
       expect(screen.getByTestId('service-title-8')).toHaveTextContent('Комбинированный массаж');
 
-      // Contact links verification
-      const phoneLink = screen.getByTestId('catalog-phone-link');
-      expect(phoneLink).toHaveAttribute('href', 'tel:+998970020404');
-      expect(phoneLink).toHaveTextContent('97 002-04-04');
-
-      const instaLink = screen.getByTestId('catalog-instagram-link');
-      expect(instaLink).toHaveAttribute('href', 'https://instagram.com/Bochka_zdorovya');
-      expect(instaLink).toHaveAttribute('target', '_blank');
-      expect(instaLink).toHaveAttribute('rel', 'noopener noreferrer');
-      expect(instaLink).toHaveTextContent('@Bochka_zdorovya');
+      // Catalog footer info verification
+      const catalogFooter = screen.getByTestId('catalog-footer-info');
+      expect(catalogFooter).toBeInTheDocument();
+      expect(catalogFooter).toHaveTextContent(BUSINESS_CONTACTS.nameRu || 'Бочка Здоровья');
     });
 
     it('renders all 8 category cards with bilingual Uzbek titles when language is uz', () => {

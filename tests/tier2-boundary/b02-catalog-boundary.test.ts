@@ -94,12 +94,14 @@ describe('Tier 2 - Boundary B02: Catalog & Contacts Boundaries (F5-F6)', () => {
     expect(normalizeInstagramUrl('Bochka_zdorovya')).toBe('https://instagram.com/Bochka_zdorovya');
   });
 
-  it('T2-B02-14: enforces reverse tabnabbing defense (rel="noopener noreferrer") on rendered Instagram link in DOM', () => {
-    renderWithProviders(React.createElement(App, null));
-    const instaLink = screen.getByTestId('header-instagram-link');
-    expect(instaLink).toHaveAttribute('target', '_blank');
-    expect(instaLink.getAttribute('rel')).toContain('noopener');
-    expect(instaLink.getAttribute('rel')).toContain('noreferrer');
+  it('T2-B02-14: enforces reverse tabnabbing defense (rel="noopener noreferrer") on any external links in DOM', () => {
+    const { container } = renderWithProviders(React.createElement(App, null));
+    const blankLinks = container.querySelectorAll('a[target="_blank"]');
+    blankLinks.forEach((link) => {
+      const rel = link.getAttribute('rel') || '';
+      expect(rel).toContain('noopener');
+      expect(rel).toContain('noreferrer');
+    });
   });
 
   it('T2-B02-15: validates Instagram URL uses secure HTTPS protocol in business contacts', () => {

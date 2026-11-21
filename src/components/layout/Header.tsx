@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Instagram, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useTranslation } from '../../context/LanguageContext';
 import { usePwaInstall } from '../../utils/pwa';
 
@@ -30,16 +30,21 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
-              <h1 className="text-sm sm:text-base md:text-lg font-bold tracking-tight text-white truncate leading-tight">
-                {t('app.title')}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm sm:text-base md:text-lg font-bold tracking-tight text-white truncate leading-tight">
+                  {t('app.title')}
+                </h1>
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                  Admin POS
+                </span>
+              </div>
               <p className="text-[10px] sm:text-xs text-teal-300/80 truncate hidden xs:block leading-tight">
                 {t('app.subtitle')}
               </p>
             </div>
           </div>
 
-          {/* Quick Actions & Language Switcher */}
+          {/* Quick Actions & Language Switcher (Customer clutter stripped out) */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             {/* Install PWA button (if available) */}
             {canInstall && (
@@ -54,31 +59,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
                 <span>{t('app.installApp')}</span>
               </button>
             )}
-
-            {/* Quick Contact Buttons */}
-            <a
-              href="tel:+998970020404"
-              data-testid="header-phone-link"
-              aria-label={`${t('priceList.callAction')}: +998 97 002-04-04`}
-              title={`${t('priceList.callAction')}: +998 97 002-04-04`}
-              className="inline-flex items-center justify-center w-8 h-8 sm:w-auto sm:px-2.5 sm:py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition-colors text-xs font-medium gap-1.5"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              <span className="hidden md:inline font-mono text-[11px]">+998 97 002-04-04</span>
-            </a>
-
-            <a
-              href="https://instagram.com/Bochka_zdorovya"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="header-instagram-link"
-              aria-label="Instagram @Bochka_zdorovya"
-              title="Instagram @Bochka_zdorovya"
-              className="inline-flex items-center justify-center w-8 h-8 sm:w-auto sm:px-2.5 sm:py-1 rounded-lg bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 transition-colors text-xs font-medium gap-1.5"
-            >
-              <Instagram className="w-3.5 h-3.5" />
-              <span className="hidden md:inline text-[11px]">@Bochka_zdorovya</span>
-            </a>
 
             {/* Bilingual Switcher: RU | UZ */}
             <div 

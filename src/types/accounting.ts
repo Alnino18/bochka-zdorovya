@@ -1,3 +1,13 @@
+export interface ServiceOrderItem {
+  id: string;
+  categoryId?: string;
+  serviceName: string;        // e.g. "Фитобочка, Сауна, Массаж (оздоровительный)"
+  serviceNameUz?: string;      // e.g. "Fitobochka, Sauna, Massaj (sog'lomlashtiruvchi)"
+  durationMinutes: number;    // 40, 60 or 0 for custom
+  price: number;              // Gross price in UZS (e.g. 300000)
+  timestamp?: string;         // Time of order e.g. "14:30"
+}
+
 export interface MasterEntry {
   id: string;
   name: string;        // "Иро", "Мах", "Комила"
@@ -7,6 +17,7 @@ export interface MasterEntry {
   payout: number;      // Payout share to master
   salonShare: number;  // revenue - payout
   clientSessions?: number[]; // Individual session amounts
+  orders?: ServiceOrderItem[]; // Itemized list of specific massage orders
 }
 
 export interface DailyExpenses {

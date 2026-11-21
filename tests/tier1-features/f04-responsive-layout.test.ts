@@ -21,8 +21,9 @@ describe('Tier 1 - Feature F04: Responsive Viewport Layout (R1)', () => {
 
     const container = screen.getByTestId('section-journal');
     expect(container).toBeInTheDocument();
-    // Header contact links are visible
-    expect(screen.getByTestId('header-phone-link')).toBeInTheDocument();
+    // POS terminal and language toggle are visible
+    expect(screen.getByTestId('language-toggle')).toBeInTheDocument();
+    expect(screen.getByTestId('pos-order-terminal')).toBeInTheDocument();
   });
 
   it('T1-F04-03: renders wide desktop layout at 1440px - 1920px with centered max-width container', () => {

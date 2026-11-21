@@ -39,45 +39,26 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
     expect(masterNames).toContain('Иро');
     expect(masterNames).toContain('Мах');
 
-    // 3. Register 2 Bookings
-    fireEvent.click(screen.getByTestId('add-booking-btn'));
-    expect(screen.getByTestId('add-booking-modal')).toBeInTheDocument();
-    fireEvent.change(screen.getByTestId('booking-time-input'), { target: { value: '11:00' } });
-    fireEvent.change(screen.getByTestId('booking-phone-input'), { target: { value: '97 123 45 67' } });
-    fireEvent.change(screen.getByTestId('booking-name-input'), { target: { value: 'Алишер' } });
-    fireEvent.click(screen.getByTestId('submit-booking-btn'));
+    // 3. Midday & Afternoon: Log POS orders
+    // For Iro: select Category 1 (60m: 320k) and submit 3 orders (= 960k)
+    fireEvent.click(screen.getByTestId('pos-service-btn-1-60'));
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
 
-    fireEvent.click(screen.getByTestId('add-booking-btn'));
-    fireEvent.change(screen.getByTestId('booking-time-input'), { target: { value: '15:00' } });
-    fireEvent.change(screen.getByTestId('booking-phone-input'), { target: { value: '90 987 65 43' } });
-    fireEvent.change(screen.getByTestId('booking-name-input'), { target: { value: 'Нодира' } });
-    fireEvent.click(screen.getByTestId('submit-booking-btn'));
+    // For Max: select Masseur chip for Max, set custom amount to 350000 and submit 2 orders (= 700k)
+    const maxChip = screen.getByRole('radio', { name: /Мах/ });
+    fireEvent.click(maxChip);
+    fireEvent.click(screen.getByTestId('pos-custom-amount-btn'));
+    fireEvent.change(screen.getByTestId('pos-custom-amount-input'), { target: { value: '350000' } });
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
 
-    expect(screen.getByText(/Алишер/)).toBeInTheDocument();
-    expect(screen.getByText(/Нодира/)).toBeInTheDocument();
-
-    // 4. Midday & Afternoon: Log client sessions
-    // For Iro: add 3 sessions (320k each = 960k)
-    const addSessionBtns = screen.getAllByTestId(/^add-session-btn-/);
-    const iroSessionBtn = addSessionBtns[0];
-    const maxSessionBtn = addSessionBtns[1];
-
-    fireEvent.click(iroSessionBtn);
-    fireEvent.click(iroSessionBtn);
-    fireEvent.click(iroSessionBtn);
-
-    // For Max: set fee to 350000 and add 2 sessions (= 700k)
-    const feeInputs = screen.getAllByTestId(/^session-fee-input-/);
-    const maxFeeInput = feeInputs[1];
-    fireEvent.change(maxFeeInput, { target: { value: '350000' } });
-    fireEvent.click(maxSessionBtn);
-    fireEvent.click(maxSessionBtn);
-
-    // 5. Afternoon & Evening: Bar sales (120,000 UZS) and Cleaning (200,000 UZS)
+    // 4. Afternoon & Evening: Bar sales (120,000 UZS) and Cleaning (200,000 UZS)
     fireEvent.change(screen.getByTestId('input-bar-revenue'), { target: { value: '120000' } });
     fireEvent.change(screen.getByTestId('input-cleaning-expense'), { target: { value: '200000' } });
 
-    // 6. Live DOM Summary Verification
+    // 5. Live DOM Summary Verification
     // 5 clients total (3 for Iro, 2 for Max)
     expect(screen.getByTestId('metric-total-clients').textContent).toBe('5');
     // Gross service revenue: 960k + 700k = 1,660,000 UZS
@@ -95,13 +76,24 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
     // Net salon profit: 1,580,000 - 500,000 = 1,080,000 UZS
     expect(screen.getByTestId('metric-net-profit').textContent).toContain('1 080 000');
 
+    // 6. Masseur Breakdown Verification in DOM
+    const masterCards = screen.getAllByTestId(/^master-card-/);
+    const iroCard = masterCards.find(c => c.textContent?.includes('Иро'))!;
+    expect(iroCard).toHaveTextContent('3x');
+    expect(iroCard).toHaveTextContent('960 000');
+
+    const maxCard = masterCards.find(c => c.textContent?.includes('Мах'))!;
+    expect(maxCard).toHaveTextContent('2x');
+    expect(maxCard).toHaveTextContent('700 000');
+
     // 7. Verify persistence across remount
     const storedRaw = localStorage.getItem(STORAGE_KEY);
     expect(storedRaw).toBeTruthy();
     const stored = JSON.parse(storedRaw!);
     const savedDay21 = stored.find((r: any) => r.date === '2026-11-21');
     expect(savedDay21.masters).toHaveLength(2);
-    expect(savedDay21.bookings).toHaveLength(2);
+    expect(savedDay21.masters[0].clientCount).toBe(3);
+    expect(savedDay21.masters[1].clientCount).toBe(2);
   });
 
   // Scenario 2: High-Volume Weekend Rush Operations
@@ -127,11 +119,9 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
     // Net balance: 4,600,000 - 200,000 cleaning = 4,400,000 UZS
     expect(screen.getByTestId('metric-net-balance').textContent).toContain('4 400 000');
 
-    // Toggle booking completion in DOM
-    const bookingToggle = screen.getByTestId(/^booking-toggle-/);
-    fireEvent.click(bookingToggle);
-    // Booking completion updated in DOM
-    expect(bookingToggle.querySelector('svg')).toBeInTheDocument();
+    // Fast-paced walk-in order during rush
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
+    expect(screen.getByTestId('metric-total-clients').textContent).toBe('16');
   });
 
   // Scenario 3: Historical Ledger Audit & Dispute Correction
@@ -144,12 +134,10 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
     expect(screen.getByTestId('metric-gross-service-revenue').textContent).toContain('1 840 000');
 
     // Audit Correction: Add missing 350,000 UZS session for Komila
-    const sessionBtns = screen.getAllByTestId(/^add-session-btn-/);
-    // Komila is 3rd master
-    const komilaSessionBtn = sessionBtns[2];
-    const feeInputs = screen.getAllByTestId(/^session-fee-input-/);
-    fireEvent.change(feeInputs[2], { target: { value: '350000' } });
-    fireEvent.click(komilaSessionBtn);
+    const komilaChip = screen.getByRole('radio', { name: /Комила/ });
+    fireEvent.click(komilaChip);
+    fireEvent.click(screen.getByTestId('pos-service-btn-2-40')); // Медовый 40m = 350,000 UZS
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
 
     // Live DOM updates: total clients becomes 7, revenue becomes 1,840k + 350k = 2,190,000 UZS
     expect(screen.getByTestId('metric-total-clients').textContent).toBe('7');
@@ -165,31 +153,29 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
     render(React.createElement(App, null));
 
     // Uzbek labels in header and journal
-    expect(screen.getAllByText(/Salomatlik spa-markazi/)[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Bochka Zdorovya')[0]).toBeInTheDocument();
+    expect(screen.getByText('Buyurtma terminali va kassa hisobi')).toBeInTheDocument();
 
-    // Morning admin adds booking in Uzbek UI
-    fireEvent.click(screen.getByTestId('add-booking-btn'));
-    fireEvent.change(screen.getByTestId('booking-time-input'), { target: { value: '11:00' } });
-    fireEvent.change(screen.getByTestId('booking-phone-input'), { target: { value: '97 123 45 67' } });
-    fireEvent.change(screen.getByTestId('booking-name-input'), { target: { value: 'Dilshod' } });
-    fireEvent.click(screen.getByTestId('submit-booking-btn'));
-
-    expect(screen.getByText(/Dilshod/)).toBeInTheDocument();
+    // Morning admin adds order in Uzbek UI
+    const iroChip = screen.getByRole('radio', { name: /Iro/i });
+    fireEvent.click(iroChip);
+    fireEvent.click(screen.getByTestId('pos-service-btn-1-40'));
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
+    expect(screen.getByTestId('metric-total-clients').textContent).toBe('7');
 
     // 2. Evening handover: Russian admin switches language to RU via Header
     fireEvent.click(screen.getByTestId('lang-btn-ru'));
-    expect(screen.getAllByText(/Оздоровительный спа-комплекс/)[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Бочка Здоровья')[0]).toBeInTheDocument();
+    expect(screen.getByText('Терминал заказов и кассовый учет')).toBeInTheDocument();
 
-    // Evening admin adds booking in Russian UI
-    fireEvent.click(screen.getByTestId('add-booking-btn'));
-    fireEvent.change(screen.getByTestId('booking-time-input'), { target: { value: '19:30' } });
-    fireEvent.change(screen.getByTestId('booking-phone-input'), { target: { value: '90 999 88 77' } });
-    fireEvent.change(screen.getByTestId('booking-name-input'), { target: { value: 'Евгений' } });
-    fireEvent.click(screen.getByTestId('submit-booking-btn'));
+    // Evening admin adds order in Russian UI
+    const maxChip = screen.getByRole('radio', { name: /Мах/i });
+    fireEvent.click(maxChip);
+    fireEvent.click(screen.getByTestId('pos-service-btn-1-60'));
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
 
-    // Both morning (Dilshod) and evening (Евгений) bookings render together in DOM
-    expect(screen.getByText(/Dilshod/)).toBeInTheDocument();
-    expect(screen.getByText(/Евгений/)).toBeInTheDocument();
+    // Both orders reflected in DOM
+    expect(screen.getByTestId('metric-total-clients').textContent).toBe('8');
   });
 
   // Scenario 5: Full Disaster Recovery & Backup Lifecycle
@@ -245,35 +231,27 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
     expect(screen.getByText(/Фитобочка, Сауна, Массаж \(оздоровительный\)/)).toBeInTheDocument();
     expect(screen.getByText(/320 000/)).toBeInTheDocument();
 
-    // 2. Admin switches back to Journal
+    // 2. Admin switches back to POS Terminal
     fireEvent.click(screen.getByTestId('bottom-nav-journal'));
     expect(screen.getByTestId('section-journal')).toBeInTheDocument();
 
-    // 3. Admin logs walk-in appointment
-    fireEvent.click(screen.getByTestId('add-booking-btn'));
-    fireEvent.change(screen.getByTestId('booking-time-input'), { target: { value: '15:30' } });
-    fireEvent.change(screen.getByTestId('booking-phone-input'), { target: { value: '90 123 45 67' } });
-    fireEvent.change(screen.getByTestId('booking-name-input'), { target: { value: 'Камила' } });
-    fireEvent.click(screen.getByTestId('submit-booking-btn'));
+    // 3. Admin selects Master "Мах"
+    const maxChip = screen.getByRole('radio', { name: /Мах/ });
+    fireEvent.click(maxChip);
 
-    expect(screen.getByText(/Камила/)).toBeInTheDocument();
+    // 4. Selects 320,000 UZS service (Category 1, 60m)
+    fireEvent.click(screen.getByTestId('pos-service-btn-1-60'));
 
-    // 4. Service completed: mark booking completed in DOM
-    const bookingCards = screen.getAllByTestId(/^booking-card-/);
-    const walkInCard = bookingCards[bookingCards.length - 1];
-    const toggleBtn = walkInCard.querySelector('button');
-    fireEvent.click(toggleBtn!);
-
-    // 5. Log 320,000 UZS session under Master "Мах"
-    const sessionBtns = screen.getAllByTestId(/^add-session-btn-/);
-    const maxSessionBtn = sessionBtns[1]; // Max is 2nd master
-    const feeInputs = screen.getAllByTestId(/^session-fee-input-/);
-    fireEvent.change(feeInputs[1], { target: { value: '320000' } });
-    fireEvent.click(maxSessionBtn);
+    // 5. Taps 'Add Order / Qabul qilish'
+    fireEvent.click(screen.getByTestId('pos-submit-order'));
 
     // 6. Live DOM reflects updated clients and revenue
     expect(screen.getByTestId('metric-total-clients').textContent).toBe('7');
     expect(screen.getByTestId('metric-gross-service-revenue').textContent).toContain('2 160 000');
+
+    // 7. Masseur breakdown reflects performed massage
+    const maxMassages = screen.getAllByTestId(/pos-masseur-massages-/)[0];
+    expect(maxMassages).toBeInTheDocument();
   });
 
   // Scenario 7: Offline Operations & Resynchronization

@@ -1,4 +1,4 @@
-import { DayRecord, DaySummary } from '../types/accounting';
+import { DayRecord, DaySummary, MasterEntry } from '../types/accounting';
 
 /**
  * Authoritative financial calculation engine matching PROJECT.md equations:
@@ -217,4 +217,79 @@ export function normalizeInstagramUrl(handleOrUrl: string | null | undefined): s
   }
   const cleanHandle = trimmed.replace(/^@/, '');
   return `https://instagram.com/${cleanHandle}`;
+}
+
+/**
+ * Itemized grouped massage structure for POS daily shift breakdown
+ */
+export interface GroupedOrderItem {
+  key: string;
+  serviceName: string;
+  durationMinutes: number;
+  unitPrice: number;
+  count: number;
+  totalPrice: number;
+}
+
+/**
+ * Aggregates all orders or client sessions for a masseur into an itemized breakdown:
+ * e.g. 2x Оздоровительный 40 мин, 1x Медовый 60 мин
+ */
+export function groupMasseurOrders(
+  master: MasterEntry | null | undefined,
+  language: 'ru' | 'uz' = 'ru'
+): GroupedOrderItem[] {
+  if (!master) return [];
+
+  if (Array.isArray(master.orders) && master.orders.length > 0) {
+    const map = new Map<string, GroupedOrderItem>();
+    for (const order of master.orders) {
+      const name = language === 'uz' && order.serviceNameUz ? order.serviceNameUz : order.serviceName;
+      const duration = order.durationMinutes || 0;
+      const price = Number(order.price) || 0;
+      const key = `${name}___${duration}___${price}`;
+
+      const existing = map.get(key);
+      if (existing) {
+        existing.count += 1;
+        existing.totalPrice += price;
+      } else {
+        map.set(key, {
+          key,
+          serviceName: name,
+          durationMinutes: duration,
+          unitPrice: price,
+          count: 1,
+          totalPrice: price,
+        });
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  // Fallback: If only clientSessions exist without explicit orders
+  if (Array.isArray(master.clientSessions) && master.clientSessions.length > 0) {
+    const map = new Map<number, GroupedOrderItem>();
+    for (const sessionFee of master.clientSessions) {
+      const fee = Number(sessionFee) || 0;
+      const existing = map.get(fee);
+      if (existing) {
+        existing.count += 1;
+        existing.totalPrice += fee;
+      } else {
+        const defaultName = language === 'ru' ? 'Сеанс массажа' : 'Massaj seansi';
+        map.set(fee, {
+          key: `fee-${fee}`,
+          serviceName: defaultName,
+          durationMinutes: fee >= 400000 ? 60 : 40,
+          unitPrice: fee,
+          count: 1,
+          totalPrice: fee,
+        });
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  return [];
 }

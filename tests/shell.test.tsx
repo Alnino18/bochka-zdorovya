@@ -8,7 +8,7 @@ import App from '../src/App';
 
 describe('Application Shell Components', () => {
   describe('Header Component', () => {
-    it('renders brand title and contact links for Phone and Instagram', () => {
+    it('renders brand title, Admin POS badge, and language toggles', () => {
       render(
         <LanguageProvider>
           <Header />
@@ -18,13 +18,8 @@ describe('Application Shell Components', () => {
       // Title
       expect(screen.getAllByText('Бочка Здоровья')[0]).toBeInTheDocument();
 
-      // Quick action links
-      const phoneLink = screen.getByTestId('header-phone-link');
-      expect(phoneLink).toHaveAttribute('href', 'tel:+998970020404');
-
-      const instagramLink = screen.getByTestId('header-instagram-link');
-      expect(instagramLink).toHaveAttribute('href', 'https://instagram.com/Bochka_zdorovya');
-      expect(instagramLink).toHaveAttribute('target', '_blank');
+      // Admin POS badge
+      expect(screen.getByText('Admin POS')).toBeInTheDocument();
 
       // Language buttons
       expect(screen.getByTestId('lang-btn-ru')).toBeInTheDocument();
@@ -111,16 +106,11 @@ describe('Application Shell Components', () => {
       expect(screen.getByTestId('section-summary')).toBeInTheDocument();
     });
 
-    it('renders contact action buttons inside a flex-wrap container for responsive wrapping', () => {
+    it('renders POS order terminal in the default active journal view', () => {
       render(<App />);
 
-      const actionsContainer = screen.getByTestId('contact-card-actions');
-      expect(actionsContainer).toBeInTheDocument();
-      expect(actionsContainer).toHaveClass('flex');
-      expect(actionsContainer).toHaveClass('flex-wrap');
-
-      const phoneLink = actionsContainer.querySelector('a[href="tel:+998970020404"]');
-      expect(phoneLink).toBeInTheDocument();
+      const posTerminal = screen.getByTestId('pos-order-terminal');
+      expect(posTerminal).toBeInTheDocument();
     });
   });
 });

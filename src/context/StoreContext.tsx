@@ -6,6 +6,7 @@ import {
   ClientBooking,
   DailyExpenses,
   BarSales,
+  ServiceOrderItem,
 } from '../types/accounting';
 import { BASELINE_RECORDS, BASELINE_NOV_19, BASELINE_NOV_20 } from '../constants/baselineData';
 import { calculateDaySummary } from '../utils/calculations';
@@ -30,6 +31,20 @@ export interface StoreContextType {
   deleteMaster: (date: string, masterId: string) => void;
   addClientSession: (date: string, masterId: string, sessionFee: number, isSpecial?: boolean) => void;
 
+  // POS Order Terminal Operations
+  addOrder: (
+    date: string,
+    masterId: string,
+    order: {
+      categoryId?: string;
+      serviceName: string;
+      serviceNameUz?: string;
+      durationMinutes: number;
+      price: number;
+    }
+  ) => void;
+  removeOrder: (date: string, masterId: string, orderId: string) => void;
+
   // Bookings Registry (F12)
   addBooking: (date: string, booking: Omit<ClientBooking, 'id' | 'date'>) => void;
   updateBooking: (date: string, bookingId: string, updates: Partial<ClientBooking>) => void;
@@ -39,6 +54,7 @@ export interface StoreContextType {
   // Facility Expenses & Bar Sales (F11)
   updateExpenses: (date: string, expenses: Partial<DailyExpenses>) => void;
   updateBar: (date: string, bar: Partial<BarSales>) => void;
+  addBarSale: (date: string, amount: number, name?: string) => void;
 
   // Day Notes
   updateDayNotes: (date: string, notes: string) => void;
@@ -176,6 +192,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           payout,
           salonShare,
           clientSessions: initialSession > 0 ? [initialSession] : [],
+          orders: initialSession > 0 ? [{
+            id: `ord-${Date.now()}`,
+            serviceName: `Сеанс (${initialSession.toLocaleString()} UZS)`,
+            serviceNameUz: `Seans (${initialSession.toLocaleString()} so'm)`,
+            durationMinutes: initialSession >= 400000 ? 60 : 40,
+            price: initialSession,
+          }] : [],
         };
 
         target.masters = [...target.masters, newEntry];
@@ -236,6 +259,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const payoutAddition = isSpecial ? 150000 : 100000;
           const payout = (m.payout || 0) + payoutAddition;
           const salonShare = revenue - payout;
+          const synthOrder: ServiceOrderItem = {
+            id: `ord-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+            serviceName: `Сеанс (${sessionFee.toLocaleString()} UZS)`,
+            serviceNameUz: `Seans (${sessionFee.toLocaleString()} so'm)`,
+            durationMinutes: sessionFee >= 400000 ? 60 : 40,
+            price: sessionFee,
+          };
+          const newOrders = [...(m.orders || []), synthOrder];
           return {
             ...m,
             clientCount,
@@ -243,6 +274,96 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             payout,
             salonShare,
             clientSessions: newSessions,
+            orders: newOrders,
+          };
+        });
+        list[idx] = target;
+        return list;
+      });
+    },
+    [updateRecords]
+  );
+
+  // POS Order Terminal Operations
+  const addOrder = useCallback(
+    (
+      date: string,
+      masterId: string,
+      order: {
+        categoryId?: string;
+        serviceName: string;
+        serviceNameUz?: string;
+        durationMinutes: number;
+        price: number;
+      }
+    ) => {
+      updateRecords((prev) => {
+        const { list, index } = ensureRecordExists(prev, date);
+        const target = { ...list[index] };
+        target.masters = target.masters.map((m) => {
+          if (m.id !== masterId) return m;
+          const orderId = `ord-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+          const newOrder: ServiceOrderItem = {
+            id: orderId,
+            categoryId: order.categoryId,
+            serviceName: order.serviceName,
+            serviceNameUz: order.serviceNameUz || order.serviceName,
+            durationMinutes: order.durationMinutes,
+            price: order.price,
+            timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+          };
+          const orders = [...(m.orders || []), newOrder];
+          const clientSessions = [...(m.clientSessions || []), order.price];
+          const clientCount = (m.clientCount || 0) + 1;
+          const revenue = (m.revenue || 0) + order.price;
+          const payout = (m.payout || 0) + 100000;
+          const salonShare = revenue - payout;
+          return {
+            ...m,
+            clientCount,
+            revenue,
+            payout,
+            salonShare,
+            clientSessions,
+            orders,
+          };
+        });
+        list[index] = target;
+        return list;
+      });
+    },
+    [updateRecords]
+  );
+
+  const removeOrder = useCallback(
+    (date: string, masterId: string, orderId: string) => {
+      updateRecords((prev) => {
+        const idx = prev.findIndex((r) => r.date === date);
+        if (idx < 0) return prev;
+        const list = [...prev];
+        const target = { ...list[idx] };
+        target.masters = target.masters.map((m) => {
+          if (m.id !== masterId) return m;
+          const orderToRemove = (m.orders || []).find((o) => o.id === orderId);
+          if (!orderToRemove) return m;
+          const orders = (m.orders || []).filter((o) => o.id !== orderId);
+          const clientSessions = [...(m.clientSessions || [])];
+          const feeIdx = clientSessions.indexOf(orderToRemove.price);
+          if (feeIdx >= 0) {
+            clientSessions.splice(feeIdx, 1);
+          }
+          const clientCount = Math.max(0, (m.clientCount || 0) - 1);
+          const revenue = Math.max(0, (m.revenue || 0) - orderToRemove.price);
+          const payout = Math.max(0, (m.payout || 0) - 100000);
+          const salonShare = revenue - payout;
+          return {
+            ...m,
+            clientCount,
+            revenue,
+            payout,
+            salonShare,
+            clientSessions,
+            orders,
           };
         });
         list[idx] = target;
@@ -356,6 +477,27 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [updateRecords]
   );
 
+  const addBarSale = useCallback(
+    (date: string, amount: number, name?: string) => {
+      updateRecords((prev) => {
+        const { list, index } = ensureRecordExists(prev, date);
+        const target = { ...list[index] };
+        const currentBar = target.bar || { revenue: 0, items: [] };
+        const currentItems = currentBar.items || [];
+        const newItem = { name: name || `Бар ${currentItems.length + 1}`, price: amount };
+        const newRevenue = (currentBar.revenue || 0) + amount;
+        target.bar = {
+          ...currentBar,
+          revenue: newRevenue,
+          items: [...currentItems, newItem],
+        };
+        list[index] = target;
+        return list;
+      });
+    },
+    [updateRecords]
+  );
+
   const updateDayNotes = useCallback(
     (date: string, notes: string) => {
       updateRecords((prev) => {
@@ -427,12 +569,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updateMaster,
       deleteMaster,
       addClientSession,
+      addOrder,
+      removeOrder,
       addBooking,
       updateBooking,
       toggleBookingComplete,
       deleteBooking,
       updateExpenses,
       updateBar,
+      addBarSale,
       updateDayNotes,
       resetToBaseline,
       exportData,
@@ -450,12 +595,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updateMaster,
       deleteMaster,
       addClientSession,
+      addOrder,
+      removeOrder,
       addBooking,
       updateBooking,
       toggleBookingComplete,
       deleteBooking,
       updateExpenses,
       updateBar,
+      addBarSale,
       updateDayNotes,
       resetToBaseline,
       exportData,

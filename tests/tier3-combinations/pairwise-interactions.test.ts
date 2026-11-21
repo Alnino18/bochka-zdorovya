@@ -10,7 +10,6 @@ import {
 } from '../../src/constants/baselineData';
 import {
   SERVICE_CATEGORIES as GOLDEN_SERVICE_CATEGORIES,
-  BUSINESS_CONTACTS as GOLDEN_CONTACTS,
 } from '../../src/constants/catalogData';
 import {
   calculateDaySummary,
@@ -44,8 +43,8 @@ describe('Tier 3 - Pairwise Combinatorial Interactions (15 Tests)', () => {
     expect(summary.netBalance).toBe(1640000);
   });
 
-  // Pair 2: UZ + 360px + prices + Catalog + Contacts
-  it('T3-PAIR-02: Uzbek mobile (360px) price list renders all 8 categories in Uzbek with contact actions', () => {
+  // Pair 2: UZ + 360px + prices + Catalog
+  it('T3-PAIR-02: Uzbek mobile (360px) price list renders all 8 categories in Uzbek with catalog reference info', () => {
     localStorage.setItem('bochka_lang', 'uz');
     setViewportWidth(360, 640);
 
@@ -57,7 +56,7 @@ describe('Tier 3 - Pairwise Combinatorial Interactions (15 Tests)', () => {
 
     const uzCategories = GOLDEN_SERVICE_CATEGORIES.map(c => c.nameUz);
     expect(uzCategories).toHaveLength(8);
-    expect(screen.getByTestId('header-phone-link').getAttribute('href')).toBe(GOLDEN_CONTACTS.phoneTelUri);
+    expect(screen.getByTestId('catalog-footer-info')).toBeInTheDocument();
   });
 
   // Pair 3: RU + 768px + prices + modified state
@@ -285,7 +284,7 @@ describe('Tier 3 - Pairwise Combinatorial Interactions (15 Tests)', () => {
   });
 
   // Pair 14: UZ + 360px + pricelist + Offline Active
-  it('T3-PAIR-14: Price catalog renders completely when offline on mobile and contact links remain accessible', () => {
+  it('T3-PAIR-14: Price catalog renders completely when offline on mobile and catalog reference remains accessible', () => {
     localStorage.setItem('bochka_lang', 'uz');
     setViewportWidth(360, 640);
 
@@ -297,7 +296,7 @@ describe('Tier 3 - Pairwise Combinatorial Interactions (15 Tests)', () => {
 
     fireEvent.click(screen.getByTestId('bottom-nav-pricelist'));
     expect(screen.getByTestId('section-pricelist')).toBeInTheDocument();
-    expect(screen.getByTestId('header-phone-link')).toBeInTheDocument();
+    expect(screen.getByTestId('catalog-footer-info')).toBeInTheDocument();
   });
 
   // Pair 15: RU + 768px + journal + Date Cycle 19->20->21->19
