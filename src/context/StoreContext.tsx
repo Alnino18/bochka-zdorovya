@@ -7,11 +7,17 @@ import {
   DailyExpenses,
   BarSales,
   ServiceOrderItem,
+  OrderUpdatePayload,
+  TelegramConfig,
 } from '../types/accounting';
+import { ServiceCategory } from '../types/catalog';
+import { SERVICE_CATEGORIES } from '../constants/catalogData';
 import { BASELINE_RECORDS, BASELINE_NOV_19, BASELINE_NOV_20 } from '../constants/baselineData';
 import { calculateDaySummary } from '../utils/calculations';
 
 export const STORAGE_KEY = 'bochka_zdorovya_records_v1';
+export const SERVICES_STORAGE_KEY = 'bochka_zdorovya_custom_services_v1';
+export const TELEGRAM_STORAGE_KEY = 'bochka_telegram_config_v1';
 
 export interface StoreContextType {
   // State
@@ -43,7 +49,22 @@ export interface StoreContextType {
       price: number;
     }
   ) => void;
+  updateOrder: (date: string, currentMasterId: string, orderId: string, updates: OrderUpdatePayload) => void;
   removeOrder: (date: string, masterId: string, orderId: string) => void;
+
+  // Dynamic Price List / Services Management
+  services: ServiceCategory[];
+  addServiceCategory: (category: Omit<ServiceCategory, 'id'>) => void;
+  updateServiceCategory: (categoryId: string, updates: Partial<ServiceCategory>) => void;
+  deleteServiceCategory: (categoryId: string) => void;
+  addServiceOption: (categoryId: string, option: { durationMinutes: number; priceUZS: number }) => void;
+  updateServiceOption: (categoryId: string, optionIndex: number, option: { durationMinutes: number; priceUZS: number }) => void;
+  deleteServiceOption: (categoryId: string, optionIndex: number) => void;
+  resetServicesToDefault: () => void;
+
+  // Telegram Bot Reporting & Settings
+  telegramConfig: TelegramConfig;
+  updateTelegramConfig: (config: TelegramConfig) => void;
 
   // Bookings Registry (F12)
   addBooking: (date: string, booking: Omit<ClientBooking, 'id' | 'date'>) => void;
@@ -114,10 +135,171 @@ function loadInitialRecords(): DayRecord[] {
   }
 }
 
+function loadInitialServices(): ServiceCategory[] {
+  try {
+    const raw = localStorage.getItem(SERVICES_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {}
+  return [...SERVICE_CATEGORIES];
+}
+
+function loadInitialTelegramConfig(): TelegramConfig {
+  try {
+    const raw = localStorage.getItem(TELEGRAM_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          botToken: parsed.botToken || '',
+          chatId: parsed.chatId || '',
+        };
+      }
+    }
+  } catch {}
+  return { botToken: '', chatId: '' };
+}
+
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [records, setRecords] = useState<DayRecord[]>(() => loadInitialRecords());
+  const [services, setServices] = useState<ServiceCategory[]>(() => loadInitialServices());
+  const [telegramConfig, setTelegramConfig] = useState<TelegramConfig>(() => loadInitialTelegramConfig());
   const [selectedDate, setSelectedDate] = useState<string>('2026-11-19');
   const [storageError, setStorageError] = useState<string | null>(null);
+
+  // Sync services to localStorage
+  const persistServices = useCallback((updated: ServiceCategory[]) => {
+    try {
+      localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  }, []);
+
+  const addServiceCategory = useCallback(
+    (category: Omit<ServiceCategory, 'id'>) => {
+      setServices((prev) => {
+        const newId = `cat-${Date.now()}`;
+        const nextCategoryNumber =
+          prev.length > 0 ? Math.max(...prev.map((c) => c.categoryNumber)) + 1 : 1;
+        const newCat: ServiceCategory = {
+          ...category,
+          id: newId,
+          categoryNumber: category.categoryNumber || nextCategoryNumber,
+          options: category.options || [],
+        };
+        const updated = [...prev, newCat];
+        persistServices(updated);
+        return updated;
+      });
+    },
+    [persistServices]
+  );
+
+  const updateServiceCategory = useCallback(
+    (categoryId: string, updates: Partial<ServiceCategory>) => {
+      setServices((prev) => {
+        const updated = prev.map((cat) => (cat.id === categoryId ? { ...cat, ...updates } : cat));
+        persistServices(updated);
+        return updated;
+      });
+    },
+    [persistServices]
+  );
+
+  const deleteServiceCategory = useCallback(
+    (categoryId: string) => {
+      setServices((prev) => {
+        const updated = prev.filter((cat) => cat.id !== categoryId);
+        persistServices(updated);
+        return updated;
+      });
+    },
+    [persistServices]
+  );
+
+  const addServiceOption = useCallback(
+    (categoryId: string, option: { durationMinutes: number; priceUZS: number }) => {
+      setServices((prev) => {
+        const updated = prev.map((cat) => {
+          if (cat.id !== categoryId) return cat;
+          const options = [
+            ...(cat.options || []),
+            {
+              posterItem: (cat.posterItems && cat.posterItems[0]) || 1,
+              durationMinutes: option.durationMinutes,
+              priceUZS: option.priceUZS,
+              priceFormatted: `${option.priceUZS.toLocaleString()} UZS`,
+            },
+          ];
+          return { ...cat, options };
+        });
+        persistServices(updated);
+        return updated;
+      });
+    },
+    [persistServices]
+  );
+
+  const updateServiceOption = useCallback(
+    (
+      categoryId: string,
+      optionIndex: number,
+      option: { durationMinutes: number; priceUZS: number }
+    ) => {
+      setServices((prev) => {
+        const updated = prev.map((cat) => {
+          if (cat.id !== categoryId) return cat;
+          const options = [...(cat.options || [])];
+          if (options[optionIndex]) {
+            options[optionIndex] = {
+              ...options[optionIndex],
+              durationMinutes: option.durationMinutes,
+              priceUZS: option.priceUZS,
+              priceFormatted: `${option.priceUZS.toLocaleString()} UZS`,
+            };
+          }
+          return { ...cat, options };
+        });
+        persistServices(updated);
+        return updated;
+      });
+    },
+    [persistServices]
+  );
+
+  const deleteServiceOption = useCallback(
+    (categoryId: string, optionIndex: number) => {
+      setServices((prev) => {
+        const updated = prev.map((cat) => {
+          if (cat.id !== categoryId) return cat;
+          const options = [...(cat.options || [])];
+          options.splice(optionIndex, 1);
+          return { ...cat, options };
+        });
+        persistServices(updated);
+        return updated;
+      });
+    },
+    [persistServices]
+  );
+
+  const resetServicesToDefault = useCallback(() => {
+    const defaults = [...SERVICE_CATEGORIES];
+    setServices(defaults);
+    try {
+      localStorage.removeItem(SERVICES_STORAGE_KEY);
+    } catch {}
+  }, []);
+
+  const updateTelegramConfig = useCallback((config: TelegramConfig) => {
+    setTelegramConfig(config);
+    try {
+      localStorage.setItem(TELEGRAM_STORAGE_KEY, JSON.stringify(config));
+    } catch {}
+  }, []);
 
   // Sync to localStorage
   const persistRecords = useCallback((updated: DayRecord[]) => {
@@ -373,6 +555,106 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [updateRecords]
   );
 
+  const updateOrder = useCallback(
+    (date: string, currentMasterId: string, orderId: string, updates: OrderUpdatePayload) => {
+      updateRecords((prev) => {
+        const idx = prev.findIndex((r) => r.date === date);
+        if (idx < 0) return prev;
+        const list = [...prev];
+        const target = { ...list[idx] };
+
+        const currentMaster = target.masters.find((m) => m.id === currentMasterId);
+        if (!currentMaster) return prev;
+        const currentOrder = (currentMaster.orders || []).find((o) => o.id === orderId);
+        if (!currentOrder) return prev;
+
+        const isChangingMaster = !!(updates.newMasterId && updates.newMasterId !== currentMasterId);
+        const targetMasterId = isChangingMaster ? updates.newMasterId! : currentMasterId;
+        const targetMaster = target.masters.find((m) => m.id === targetMasterId);
+        if (!targetMaster) return prev;
+
+        // Calculate bar items difference if any bar items were modified
+        const oldBarSum = (currentOrder.barItems || []).reduce((acc, it) => acc + (it.price || 0), 0);
+        const newBarSum =
+          updates.barItems !== undefined
+            ? updates.barItems.reduce((acc, it) => acc + (it.price || 0), 0)
+            : oldBarSum;
+        const barDiff = newBarSum - oldBarSum;
+        if (barDiff !== 0) {
+          const currentBarRev = target.bar?.revenue || 0;
+          target.bar = {
+            ...target.bar,
+            revenue: Math.max(0, currentBarRev + barDiff),
+          };
+        }
+
+        const newPrice = updates.price !== undefined ? updates.price : currentOrder.price;
+        const updatedOrder: ServiceOrderItem = {
+          ...currentOrder,
+          serviceName: updates.serviceName !== undefined ? updates.serviceName : currentOrder.serviceName,
+          serviceNameUz:
+            updates.serviceNameUz !== undefined ? updates.serviceNameUz : currentOrder.serviceNameUz,
+          durationMinutes:
+            updates.durationMinutes !== undefined
+              ? updates.durationMinutes
+              : currentOrder.durationMinutes,
+          price: newPrice,
+          barItems: updates.barItems !== undefined ? updates.barItems : currentOrder.barItems,
+          notes: updates.notes !== undefined ? updates.notes : currentOrder.notes,
+        };
+
+        if (isChangingMaster) {
+          // Remove from currentMaster and add to targetMaster
+          target.masters = target.masters.map((m) => {
+            if (m.id === currentMasterId) {
+              const orders = (m.orders || []).filter((o) => o.id !== orderId);
+              const clientSessions = [...(m.clientSessions || [])];
+              const fIdx = clientSessions.indexOf(currentOrder.price);
+              if (fIdx >= 0) clientSessions.splice(fIdx, 1);
+              const clientCount = Math.max(0, (m.clientCount || 0) - 1);
+              const revenue = Math.max(0, (m.revenue || 0) - currentOrder.price);
+              const payout = Math.max(0, (m.payout || 0) - 100000);
+              const salonShare = revenue - payout;
+              return { ...m, orders, clientSessions, clientCount, revenue, payout, salonShare };
+            }
+            if (m.id === targetMasterId) {
+              const orders = [...(m.orders || []), updatedOrder];
+              const clientSessions = [...(m.clientSessions || []), newPrice];
+              const clientCount = (m.clientCount || 0) + 1;
+              const revenue = (m.revenue || 0) + newPrice;
+              const payout = (m.payout || 0) + 100000;
+              const salonShare = revenue - payout;
+              return { ...m, orders, clientSessions, clientCount, revenue, payout, salonShare };
+            }
+            return m;
+          });
+        } else {
+          // Update in same master
+          target.masters = target.masters.map((m) => {
+            if (m.id !== currentMasterId) return m;
+            const orders = (m.orders || []).map((o) => (o.id === orderId ? updatedOrder : o));
+            const priceDiff = newPrice - currentOrder.price;
+            const clientSessions = [...(m.clientSessions || [])];
+            const fIdx = clientSessions.indexOf(currentOrder.price);
+            if (fIdx >= 0) {
+              clientSessions[fIdx] = newPrice;
+            } else {
+              clientSessions.push(newPrice);
+            }
+            const revenue = Math.max(0, (m.revenue || 0) + priceDiff);
+            const payout = m.payout || 0; // client count unchanged
+            const salonShare = revenue - payout;
+            return { ...m, orders, clientSessions, revenue, salonShare };
+          });
+        }
+
+        list[idx] = target;
+        return list;
+      });
+    },
+    [updateRecords]
+  );
+
   // Bookings Registry
   const addBooking = useCallback(
     (date: string, booking: Omit<ClientBooking, 'id' | 'date'>) => {
@@ -570,7 +852,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       deleteMaster,
       addClientSession,
       addOrder,
+      updateOrder,
       removeOrder,
+      services,
+      addServiceCategory,
+      updateServiceCategory,
+      deleteServiceCategory,
+      addServiceOption,
+      updateServiceOption,
+      deleteServiceOption,
+      resetServicesToDefault,
+      telegramConfig,
+      updateTelegramConfig,
       addBooking,
       updateBooking,
       toggleBookingComplete,
@@ -596,7 +889,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       deleteMaster,
       addClientSession,
       addOrder,
+      updateOrder,
       removeOrder,
+      services,
+      addServiceCategory,
+      updateServiceCategory,
+      deleteServiceCategory,
+      addServiceOption,
+      updateServiceOption,
+      deleteServiceOption,
+      resetServicesToDefault,
+      telegramConfig,
+      updateTelegramConfig,
       addBooking,
       updateBooking,
       toggleBookingComplete,

@@ -218,15 +218,16 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
     fireEvent.click(uzBtn);
 
     // Uzbek step titles and buttons
-    expect(screen.getByText('1. Ustanı tanlang')).toBeInTheDocument();
+    expect(screen.getByText('1. Massajistkani tanlang')).toBeInTheDocument();
     expect(screen.getByText('2. Xizmatni tanlang')).toBeInTheDocument();
-    expect(screen.getByText('3. Buyurtmani tasdiqlash:')).toBeInTheDocument();
+    expect(screen.getByText(/3\. Buyurtmani tasdiqlash/)).toBeInTheDocument();
 
     // Switch back to Russian
     const ruBtn = screen.getByTestId('lang-btn-ru');
     fireEvent.click(ruBtn);
 
-    expect(screen.getByText('1. Выберите мастера')).toBeInTheDocument();
+    expect(screen.getByText('1. Выберите массажистку')).toBeInTheDocument();
     expect(screen.getByText('2. Выберите услугу')).toBeInTheDocument();
+    expect(screen.getByText(/3\. Подтвердить заказ/)).toBeInTheDocument();
   });
 });

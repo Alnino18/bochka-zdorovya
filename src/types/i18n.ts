@@ -38,6 +38,12 @@ export interface PriceListTranslations {
   resetFilter: string;
   categoryBadge: string;
   orderBooking: string;
+  editPriceList?: string;
+  addService?: string;
+  savePriceList?: string;
+  resetToDefault?: string;
+  deleteService?: string;
+  addOption?: string;
 }
 
 export interface JournalActionTranslations {
@@ -131,6 +137,17 @@ export interface PosTranslations {
   netCash: string;
   undoOrder: string;
   durationMin: string;
+  editOrder?: string;
+  saveOrder?: string;
+  orderEditedSuccess?: string;
+  sendTelegram?: string;
+  sendTelegramSuccess?: string;
+  telegramSettings?: string;
+  copyReport?: string;
+  reportCopiedSuccess?: string;
+  botTokenLabel?: string;
+  chatIdLabel?: string;
+  addBarToOrder?: string;
 }
 
 export interface TranslationDictionary {

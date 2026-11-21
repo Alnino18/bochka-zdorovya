@@ -1,3 +1,10 @@
+export interface OrderBarItem {
+  id: string;
+  name: string;
+  nameUz?: string;
+  price: number;
+}
+
 export interface ServiceOrderItem {
   id: string;
   categoryId?: string;
@@ -6,6 +13,23 @@ export interface ServiceOrderItem {
   durationMinutes: number;    // 40, 60 or 0 for custom
   price: number;              // Gross price in UZS (e.g. 300000)
   timestamp?: string;         // Time of order e.g. "14:30"
+  barItems?: OrderBarItem[];  // Optional extra bar items attached to this order
+  notes?: string;
+}
+
+export interface OrderUpdatePayload {
+  newMasterId?: string;
+  serviceName?: string;
+  serviceNameUz?: string;
+  durationMinutes?: number;
+  price?: number;
+  barItems?: OrderBarItem[];
+  notes?: string;
+}
+
+export interface TelegramConfig {
+  botToken: string;
+  chatId: string;
 }
 
 export interface MasterEntry {

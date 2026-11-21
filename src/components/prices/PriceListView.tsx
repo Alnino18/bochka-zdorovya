@@ -6,8 +6,10 @@ import {
   Tag,
   CheckCircle2,
   Filter,
+  Edit3,
 } from 'lucide-react';
 import { useTranslation } from '../../context/LanguageContext';
+import { useStore } from '../../context/StoreContext';
 import {
   BUSINESS_CONTACTS,
   SERVICE_CATEGORIES,
@@ -15,6 +17,7 @@ import {
   formatCurrencyUZS,
 } from '../../constants/catalogData';
 import { ServiceCategory } from '../../types/catalog';
+import { PriceEditorModal } from './PriceEditorModal';
 
 type DurationFilter = 'all' | 40 | 60;
 type GroupFilter = 'all' | 'phyto' | 'massage';
@@ -24,12 +27,26 @@ interface PriceListViewProps {
 }
 
 export const PriceListView: React.FC<PriceListViewProps> = ({
-  categories = SERVICE_CATEGORIES,
+  categories: propCategories,
 }) => {
   const { language, t } = useTranslation();
+
+  let storeServices: ServiceCategory[] | undefined;
+  let hasStore = false;
+  try {
+    const store = useStore();
+    storeServices = store.services;
+    hasStore = true;
+  } catch {
+    storeServices = undefined;
+    hasStore = false;
+  }
+  const categories = propCategories || storeServices || SERVICE_CATEGORIES;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [groupFilter, setGroupFilter] = useState<GroupFilter>('all');
   const [durationFilter, setDurationFilter] = useState<DurationFilter>('all');
+  const [isPriceEditorOpen, setIsPriceEditorOpen] = useState(false);
 
   if (!categories || categories.length === 0) {
     return (
@@ -134,7 +151,16 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPriceEditorOpen(true)}
+              data-testid="open-price-editor-btn"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>{t('priceList.editPriceList') || (language === 'ru' ? 'Редактировать прейскурант' : 'Narxlarni tahrirlash')}</span>
+            </button>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-teal-300 border border-slate-700 text-xs font-bold">
               {BUSINESS_CONTACTS.nameRu} • {language === 'ru' ? 'Справочник цен' : 'Narxlar ma\'lumotnomasi'}
             </span>
@@ -399,11 +425,16 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
           </div>
 
           <div className="text-xs text-slate-400 text-right">
-            <span className="font-mono text-teal-400 font-bold">10 {language === 'ru' ? 'позиций цен' : 'narx pozitsiyasi'}</span>
+            <span className="font-mono text-teal-400 font-bold">{categories.length} {language === 'ru' ? 'категорий услуг' : 'toifalar'}</span>
           </div>
         </div>
       </section>
       </div>
+
+      {/* Admin Price List Editor Modal */}
+      {hasStore && isPriceEditorOpen && (
+        <PriceEditorModal onClose={() => setIsPriceEditorOpen(false)} />
+      )}
     </section>
   );
 };

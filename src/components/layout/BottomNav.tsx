@@ -32,7 +32,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 shadow-lg"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-900 shadow-2xl"
       aria-label="Bottom Navigation"
       data-testid="bottom-nav"
     >
@@ -48,15 +48,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
               data-testid={`bottom-nav-${tab.id}`}
               aria-label={tab.label}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center py-1 px-1 rounded-lg transition-all ${
+              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer ${
                 isActive
-                  ? 'text-teal-400 font-semibold'
+                  ? 'text-emerald-400 font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <div
-                className={`p-1 rounded-md transition-colors ${
-                  isActive ? 'bg-teal-500/20' : ''
+                className={`p-1 rounded-lg transition-colors ${
+                  isActive ? 'bg-emerald-500/20 text-emerald-400' : ''
                 }`}
               >
                 <Icon className="w-5 h-5" />
