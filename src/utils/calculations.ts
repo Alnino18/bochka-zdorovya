@@ -293,3 +293,13 @@ export function groupMasseurOrders(
 
   return [];
 }
+
+// Re-export Tashkent date/time utilities
+export {
+  getTashkentTodayDate,
+  getTashkentTimeString,
+  formatTashkentDateDisplay,
+  getTashkentLiveHeaderString,
+  TASHKENT_TIMEZONE,
+} from './date';
+

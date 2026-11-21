@@ -13,7 +13,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-01: renders Admin POS Order Terminal shell without customer-facing clutter', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // Verifies POS Terminal is active on the journal tab
     expect(screen.getByTestId('pos-order-terminal')).toBeInTheDocument();
@@ -27,7 +27,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-02: allows selecting masseur via quick chips (Step 1)', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // Check chips exist for baseline Nov 19 masseurs (Иро, Мах, Комила)
     const iroChip = screen.getByTestId('pos-masseur-chip-m-iro-19');
@@ -50,7 +50,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-03: renders menu cards for all 8 official categories and allows selecting services (Step 2)', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // Verify all 8 categories exist
     for (let i = 1; i <= 8; i++) {
@@ -69,7 +69,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-04: executes instant order logging (Step 3: Qabul qilish) and updates masseur shift', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // Select Masseur: Iro (starts with 2 clients in baseline Nov 19)
     const iroChip = screen.getByTestId('pos-masseur-chip-m-iro-19');
@@ -150,7 +150,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-06: allows logging quick bar sales and cleaning expenses', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // Quick bar preset: e.g. + Choy 20k
     const barBtn = screen.getByTestId('pos-quick-bar-btn-20000');
@@ -168,7 +168,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-07: verifies salon net summary metrics match cashier ledger calculations', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // For baseline Nov 19:
     // Total clients = 6
@@ -187,7 +187,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-08: supports custom amount order logging', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // Select Masseur Komila
     fireEvent.click(screen.getByTestId('pos-masseur-chip-m-komila-19'));
@@ -211,7 +211,7 @@ describe('Feature F13: High-Speed Admin POS Order Terminal', () => {
   });
 
   it('T1-F13-09: verifies bilingual UZ/RU switching on the POS terminal', () => {
-    render(<App />);
+    render(<App initialDate="2026-11-19" />);
 
     // Switch to Uzbek
     const uzBtn = screen.getByTestId('lang-btn-uz');

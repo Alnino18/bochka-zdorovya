@@ -32,6 +32,13 @@ export interface TelegramConfig {
   chatId: string;
 }
 
+export interface StaffMember {
+  id: string;          // e.g. "staff-iro", "staff-max", "staff-komila"
+  name: string;        // "Иро", "Мах", "Комила"
+  nameUz?: string;      // "Iro", "Max", "Komila"
+  active?: boolean;
+}
+
 export interface MasterEntry {
   id: string;
   name: string;        // "Иро", "Мах", "Комила"

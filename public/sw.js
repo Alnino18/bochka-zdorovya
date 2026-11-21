@@ -1,5 +1,5 @@
 // Service Worker for "Бочка Здоровья" PWA
-const CACHE_NAME = 'bochka-pwa-v1';
+const CACHE_NAME = 'bochka-pwa-v5';
 
 const STATIC_PRECACHE = [
   './',

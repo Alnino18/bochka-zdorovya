@@ -22,7 +22,7 @@ describe('Feature F14: Modern Redesign & Extended POS Features', () => {
 
   describe('1. Terminology Validation: Massajistka (UZ) / Массажистка (RU)', () => {
     it('T1-F14-01: verifies "Массажистка" terminology in Russian UI', () => {
-      render(<App />);
+      render(<App initialDate="2026-11-19" />);
 
       // Switch to RU
       fireEvent.click(screen.getByTestId('lang-btn-ru'));
@@ -47,7 +47,7 @@ describe('Feature F14: Modern Redesign & Extended POS Features', () => {
     });
 
     it('T1-F14-02: verifies "Massajistka" terminology in Uzbek UI', () => {
-      render(<App />);
+      render(<App initialDate="2026-11-19" />);
 
       // Switch to UZ
       fireEvent.click(screen.getByTestId('lang-btn-uz'));
@@ -71,7 +71,7 @@ describe('Feature F14: Modern Redesign & Extended POS Features', () => {
 
   describe('2. Price List Editor Modal & Dynamic Catalog Management', () => {
     it('T1-F14-03: opens Price Editor Modal from Price List tab and lists services', () => {
-      render(<App />);
+      render(<App initialDate="2026-11-19" />);
 
       // Navigate to Price List tab
       const priceListTabs = screen.getAllByText(/Narxlar ro'yxati|Прейскурант/i);
@@ -92,7 +92,7 @@ describe('Feature F14: Modern Redesign & Extended POS Features', () => {
     });
 
     it('T1-F14-04: allows adding a new service category and saving to localStorage', () => {
-      render(<App />);
+      render(<App initialDate="2026-11-19" />);
 
       // Navigate to Price List tab
       fireEvent.click(screen.getAllByText(/Narxlar ro'yxati|Прейскурант/i)[0]);
@@ -126,7 +126,7 @@ describe('Feature F14: Modern Redesign & Extended POS Features', () => {
     });
 
     it('T1-F14-05: allows editing existing service option price and resetting to defaults', () => {
-      render(<App />);
+      render(<App initialDate="2026-11-19" />);
 
       fireEvent.click(screen.getAllByText(/Narxlar ro'yxati|Прейскурант/i)[0]);
       fireEvent.click(screen.getByTestId('open-price-editor-btn'));
@@ -151,7 +151,7 @@ describe('Feature F14: Modern Redesign & Extended POS Features', () => {
 
   describe('3. Order Edit & Modification Flow', () => {
     it('T1-F14-06: opens EditOrderModal, adjusts price, adds drink/tea, and changes massajistka', () => {
-      render(<App />);
+      render(<App initialDate="2026-11-19" />);
 
       // Baseline Nov 19: Masseur Iro has order ord-iro-19-1 (370 000 UZS)
       const editBtn = screen.getByTestId('edit-order-btn-ord-iro-19-1');
@@ -260,7 +260,7 @@ describe('Feature F14: Modern Redesign & Extended POS Features', () => {
     });
 
     it('T1-F14-10: manages Telegram modal settings and clipboard copy', async () => {
-      render(<App />);
+      render(<App initialDate="2026-11-19" />);
 
       // Click Telegram button in POS header
       const telegramBtn = screen.getByTestId('send-telegram-btn');

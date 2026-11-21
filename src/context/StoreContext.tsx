@@ -9,15 +9,65 @@ import {
   ServiceOrderItem,
   OrderUpdatePayload,
   TelegramConfig,
+  StaffMember,
 } from '../types/accounting';
 import { ServiceCategory } from '../types/catalog';
 import { SERVICE_CATEGORIES } from '../constants/catalogData';
 import { BASELINE_RECORDS, BASELINE_NOV_19, BASELINE_NOV_20 } from '../constants/baselineData';
 import { calculateDaySummary } from '../utils/calculations';
+import { getTashkentTodayDate } from '../utils/date';
 
 export const STORAGE_KEY = 'bochka_zdorovya_records_v1';
 export const SERVICES_STORAGE_KEY = 'bochka_zdorovya_custom_services_v1';
 export const TELEGRAM_STORAGE_KEY = 'bochka_telegram_config_v1';
+export const STAFF_STORAGE_KEY = 'bochka_zdorovya_staff_roster_v1';
+
+export const DEFAULT_STAFF: StaffMember[] = [
+  { id: 'iro', name: 'Иро', nameUz: 'Iro', active: true },
+  { id: 'max', name: 'Мах', nameUz: 'Max', active: true },
+  { id: 'komila', name: 'Комила', nameUz: 'Komila', active: true },
+];
+
+export function loadInitialStaff(): StaffMember[] {
+  try {
+    const raw = localStorage.getItem(STAFF_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {}
+  return [...DEFAULT_STAFF];
+}
+
+export function createEmptyDayRecord(date: string, staffList?: StaffMember[]): DayRecord {
+  const parts = date.split('-');
+  const dateFormatted = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : date;
+  const staff = staffList && staffList.length > 0 ? staffList : loadInitialStaff();
+  
+  const initialMasters: MasterEntry[] = staff.map((s) => ({
+    id: `m-${s.id}-${date}`,
+    name: s.name,
+    nameUz: s.nameUz || s.name,
+    clientCount: 0,
+    revenue: 0,
+    payout: 0,
+    salonShare: 0,
+    clientSessions: [],
+    orders: [],
+  }));
+
+  return {
+    id: `journal-${date}`,
+    date,
+    dateFormatted,
+    masters: initialMasters,
+    expenses: { cleaning: 0, other: 0 },
+    bar: { revenue: 0 },
+    bookings: [],
+  };
+}
 
 export interface StoreContextType {
   // State
@@ -26,6 +76,12 @@ export interface StoreContextType {
   currentRecord: DayRecord;
   summary: DaySummary;
   storageError: string | null;
+
+  // Staff Registry (Persistent Salon Massajistkas)
+  staff: StaffMember[];
+  addStaffMember: (member: { name: string; nameUz?: string }) => void;
+  removeStaffMember: (staffId: string) => void;
+  resetStaffToDefault: () => void;
 
   // Date Navigation
   setSelectedDate: (date: string) => void;
@@ -87,20 +143,6 @@ export interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
-
-function createEmptyDayRecord(date: string): DayRecord {
-  const parts = date.split('-');
-  const dateFormatted = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : date;
-  return {
-    id: `journal-${date}`,
-    date,
-    dateFormatted,
-    masters: [],
-    expenses: { cleaning: 0, other: 0 },
-    bar: { revenue: 0 },
-    bookings: [],
-  };
-}
 
 function loadInitialRecords(): DayRecord[] {
   try {
@@ -164,12 +206,57 @@ function loadInitialTelegramConfig(): TelegramConfig {
   return { botToken: '', chatId: '' };
 }
 
-export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: string }> = ({
+  children,
+  initialDate,
+}) => {
   const [records, setRecords] = useState<DayRecord[]>(() => loadInitialRecords());
   const [services, setServices] = useState<ServiceCategory[]>(() => loadInitialServices());
   const [telegramConfig, setTelegramConfig] = useState<TelegramConfig>(() => loadInitialTelegramConfig());
-  const [selectedDate, setSelectedDate] = useState<string>('2026-11-19');
+  const [staff, setStaff] = useState<StaffMember[]>(() => loadInitialStaff());
+  const [selectedDate, setSelectedDate] = useState<string>(() => initialDate || getTashkentTodayDate());
   const [storageError, setStorageError] = useState<string | null>(null);
+
+  // Sync staff roster to localStorage
+  const persistStaff = useCallback((updated: StaffMember[]) => {
+    try {
+      localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  }, []);
+
+  const addStaffMember = useCallback(
+    (member: { name: string; nameUz?: string }) => {
+      const trimmedName = member.name.trim();
+      const trimmedNameUz = member.nameUz?.trim() || trimmedName;
+      const staffId = trimmedName.toLowerCase().replace(/[^a-z0-9а-яё]/gi, '') || `staff-${Date.now()}`;
+      setStaff((prev) => {
+        if (prev.some((s) => s.name.toLowerCase() === trimmedName.toLowerCase())) return prev;
+        const updated = [...prev, { id: staffId, name: trimmedName, nameUz: trimmedNameUz, active: true }];
+        persistStaff(updated);
+        return updated;
+      });
+    },
+    [persistStaff]
+  );
+
+  const removeStaffMember = useCallback(
+    (staffId: string) => {
+      setStaff((prev) => {
+        const updated = prev.filter((s) => s.id !== staffId && s.name.toLowerCase() !== staffId.toLowerCase());
+        persistStaff(updated);
+        return updated;
+      });
+    },
+    [persistStaff]
+  );
+
+  const resetStaffToDefault = useCallback(() => {
+    const defaults = [...DEFAULT_STAFF];
+    setStaff(defaults);
+    try {
+      localStorage.removeItem(STAFF_STORAGE_KEY);
+    } catch {}
+  }, []);
 
   // Sync services to localStorage
   const persistServices = useCallback((updated: ServiceCategory[]) => {
@@ -335,60 +422,112 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const currentRecord = useMemo((): DayRecord => {
     const found = records.find((r) => r.date === selectedDate);
-    return found || createEmptyDayRecord(selectedDate);
-  }, [records, selectedDate]);
+    return found || createEmptyDayRecord(selectedDate, staff);
+  }, [records, selectedDate, staff]);
 
   const summary = useMemo(() => {
     return calculateDaySummary(currentRecord);
   }, [currentRecord]);
 
-  const ensureRecordExists = (list: DayRecord[], date: string): { list: DayRecord[]; index: number } => {
-    const idx = list.findIndex((r) => r.date === date);
-    if (idx >= 0) {
-      return { list: [...list], index: idx };
-    }
-    const newRecord = createEmptyDayRecord(date);
-    const updated = [...list, newRecord];
-    return { list: updated, index: updated.length - 1 };
-  };
+  const ensureRecordExists = useCallback(
+    (list: DayRecord[], date: string): { list: DayRecord[]; index: number } => {
+      const idx = list.findIndex((r) => r.date === date);
+      if (idx >= 0) {
+        return { list: [...list], index: idx };
+      }
+      const newRecord = createEmptyDayRecord(date, staff);
+      const updated = [...list, newRecord];
+      return { list: updated, index: updated.length - 1 };
+    },
+    [staff]
+  );
 
   // Master Operations
   const addMaster = useCallback(
     (date: string, master: { name: string; nameUz?: string; initialSession?: number }) => {
+      const trimmedName = master.name.trim();
+      const trimmedNameUz = master.nameUz?.trim() || trimmedName;
+      const staffId = trimmedName.toLowerCase().replace(/[^a-z0-9а-яё]/gi, '') || `staff-${Date.now()}`;
+
+      // 1. Add to permanent salon staff registry and save in localStorage
+      setStaff((prevStaff) => {
+        const exists = prevStaff.some(
+          (s) => s.name.toLowerCase() === trimmedName.toLowerCase()
+        );
+        if (!exists) {
+          const updatedStaff = [...prevStaff, { id: staffId, name: trimmedName, nameUz: trimmedNameUz, active: true }];
+          persistStaff(updatedStaff);
+          return updatedStaff;
+        }
+        return prevStaff;
+      });
+
+      // 2. Add or update in records for this date
       updateRecords((prev) => {
         const { list, index } = ensureRecordExists(prev, date);
         const target = { ...list[index] };
-        const id = `m-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
         const initialSession = Number(master.initialSession) || 0;
         const clientCount = initialSession > 0 ? 1 : 0;
         const revenue = initialSession;
         const payout = clientCount * 100000;
         const salonShare = revenue - payout;
 
-        const newEntry: MasterEntry = {
-          id,
-          name: master.name,
-          nameUz: master.nameUz || master.name,
-          clientCount,
-          revenue,
-          payout,
-          salonShare,
-          clientSessions: initialSession > 0 ? [initialSession] : [],
-          orders: initialSession > 0 ? [{
-            id: `ord-${Date.now()}`,
-            serviceName: `Сеанс (${initialSession.toLocaleString()} UZS)`,
-            serviceNameUz: `Seans (${initialSession.toLocaleString()} so'm)`,
-            durationMinutes: initialSession >= 400000 ? 60 : 40,
-            price: initialSession,
-          }] : [],
-        };
+        const existingIdx = target.masters.findIndex(
+          (m) => m.name.toLowerCase() === trimmedName.toLowerCase()
+        );
 
-        target.masters = [...target.masters, newEntry];
+        if (existingIdx >= 0) {
+          const m = target.masters[existingIdx];
+          const updatedMaster: MasterEntry = {
+            ...m,
+            name: trimmedName,
+            nameUz: trimmedNameUz,
+            clientCount: m.clientCount + clientCount,
+            revenue: m.revenue + revenue,
+            payout: m.payout + payout,
+            salonShare: (m.revenue + revenue) - (m.payout + payout),
+            clientSessions: initialSession > 0 ? [...(m.clientSessions || []), initialSession] : (m.clientSessions || []),
+            orders: initialSession > 0 ? [
+              ...(m.orders || []),
+              {
+                id: `ord-${Date.now()}`,
+                serviceName: `Сеанс (${initialSession.toLocaleString()} UZS)`,
+                serviceNameUz: `Seans (${initialSession.toLocaleString()} so'm)`,
+                durationMinutes: initialSession >= 400000 ? 60 : 40,
+                price: initialSession,
+              }
+            ] : (m.orders || []),
+          };
+          const updatedMasters = [...target.masters];
+          updatedMasters[existingIdx] = updatedMaster;
+          target.masters = updatedMasters;
+        } else {
+          const id = `m-${staffId}-${date}-${Math.random().toString(36).substr(2, 4)}`;
+          const newEntry: MasterEntry = {
+            id,
+            name: trimmedName,
+            nameUz: trimmedNameUz,
+            clientCount,
+            revenue,
+            payout,
+            salonShare,
+            clientSessions: initialSession > 0 ? [initialSession] : [],
+            orders: initialSession > 0 ? [{
+              id: `ord-${Date.now()}`,
+              serviceName: `Сеанс (${initialSession.toLocaleString()} UZS)`,
+              serviceNameUz: `Seans (${initialSession.toLocaleString()} so'm)`,
+              durationMinutes: initialSession >= 400000 ? 60 : 40,
+              price: initialSession,
+            }] : [],
+          };
+          target.masters = [...target.masters, newEntry];
+        }
+
         list[index] = target;
         return list;
       });
     },
-    [updateRecords]
+    [ensureRecordExists, persistStaff, updateRecords]
   );
 
   const updateMaster = useCallback(
@@ -797,6 +936,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const baselineCopy = JSON.parse(JSON.stringify(BASELINE_RECORDS));
     setRecords(baselineCopy);
     persistRecords(baselineCopy);
+    setStaff([...DEFAULT_STAFF]);
+    try {
+      localStorage.removeItem(STAFF_STORAGE_KEY);
+    } catch {}
     setSelectedDate('2026-11-19');
   }, [persistRecords]);
 
@@ -847,6 +990,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       storageError,
       setSelectedDate,
       getRecordByDate,
+      staff,
+      addStaffMember,
+      removeStaffMember,
+      resetStaffToDefault,
       addMaster,
       updateMaster,
       deleteMaster,
@@ -884,6 +1031,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       storageError,
       setSelectedDate,
       getRecordByDate,
+      staff,
+      addStaffMember,
+      removeStaffMember,
+      resetStaffToDefault,
       addMaster,
       updateMaster,
       deleteMaster,
