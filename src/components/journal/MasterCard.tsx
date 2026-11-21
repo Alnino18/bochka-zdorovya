@@ -55,6 +55,7 @@ export const MasterCard: React.FC<MasterCardProps> = ({ master }) => {
           onClick={handleDelete}
           data-testid={`delete-master-btn-${master.id}`}
           title={t('journal.actions.delete')}
+          aria-label={`${t('journal.actions.delete')} ${masterName}`}
           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-700/60 transition-colors"
         >
           <Trash2 className="w-4 h-4" />
@@ -110,7 +111,8 @@ export const MasterCard: React.FC<MasterCardProps> = ({ master }) => {
           value={feeInput}
           data-testid={`session-fee-input-${master.id}`}
           onChange={(e) => setFeeInput(e.target.value)}
-          placeholder="Сумма сеанса"
+          placeholder={language === 'ru' ? 'Сумма сеанса' : 'Seans summasi'}
+          aria-label={language === 'ru' ? 'Сумма сеанса' : 'Seans summasi'}
           className="w-28 bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-teal-500"
         />
         <button
@@ -120,7 +122,7 @@ export const MasterCard: React.FC<MasterCardProps> = ({ master }) => {
           className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shadow-sm transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>+ Сеанс</span>
+          <span>{language === 'ru' ? '+ Сеанс' : '+ Seans'}</span>
         </button>
       </div>
     </div>

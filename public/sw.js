@@ -41,6 +41,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
+  // Only handle GET requests with HTTP/HTTPS schemes
+  if (request.method !== 'GET' || !request.url.startsWith('http')) {
+    return;
+  }
+
   // 1. Navigation requests (HTML document loads)
   if (request.mode === 'navigate') {
     event.respondWith(

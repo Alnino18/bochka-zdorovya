@@ -9,7 +9,7 @@ interface BookingsSectionProps {
 }
 
 export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingClick }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { selectedDate, currentRecord, toggleBookingComplete, deleteBooking } = useStore();
 
   const bookings = currentRecord?.bookings || [];
@@ -34,7 +34,7 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
 
       {bookings.length === 0 ? (
         <div className="py-6 text-center text-slate-500 text-xs">
-          Нет записей на этот день
+          {language === 'ru' ? 'Нет записей на этот день' : "Bu kunga yozuvlar yo'q"}
         </div>
       ) : (
         <div className="space-y-2.5" data-testid="bookings-list">
@@ -55,7 +55,11 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                     type="button"
                     onClick={() => toggleBookingComplete(selectedDate, booking.id)}
                     data-testid={`booking-toggle-${booking.id}`}
-                    aria-label="Toggle completion"
+                    aria-label={
+                      booking.completed
+                        ? (language === 'ru' ? 'Отметить как невыполненную' : 'Bajarilmagan deb belgilash')
+                        : (language === 'ru' ? 'Отметить как выполненную' : 'Bajarilgan deb belgilash')
+                    }
                     className="text-slate-400 hover:text-teal-400 transition-colors"
                   >
                     {booking.completed ? (
@@ -80,7 +84,7 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                       )}
                       {booking.partySize > 1 && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
-                          {booking.partySize} чел.
+                          {booking.partySize} {language === 'ru' ? 'чел.' : 'kishi'}
                         </span>
                       )}
                     </div>
@@ -89,6 +93,7 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                       <a
                         href={telUri}
                         data-testid={`booking-call-link-${booking.id}`}
+                        aria-label={`${t('priceList.callAction')}: ${booking.phone}`}
                         className="text-xs text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors"
                       >
                         <Phone className="w-3 h-3" />
@@ -107,6 +112,8 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                   type="button"
                   onClick={() => deleteBooking(selectedDate, booking.id)}
                   data-testid={`booking-delete-${booking.id}`}
+                  title={t('journal.actions.delete')}
+                  aria-label={t('journal.actions.delete')}
                   className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />

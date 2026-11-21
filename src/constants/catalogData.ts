@@ -1,4 +1,4 @@
-import { BusinessContacts, PriceListData, ServiceCategory } from '../types/catalog';
+import { BusinessContacts, PosterRow, PriceListData, ServiceCategory } from '../types/catalog';
 
 /**
  * Authoritative Business Contact Details for "Бочка Здоровья"
@@ -204,17 +204,125 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
 ];
 
 /**
+ * Authoritative 10 Poster Rows from the original salon price poster
+ */
+export const POSTER_ROWS: PosterRow[] = [
+  {
+    rowNumber: 1,
+    serviceRu: 'Фитобочка, Сауна, Массаж (оздоровительный)',
+    serviceUz: "Fitobochka, Sauna, Massaj (sog'lomlashtiruvchi)",
+    duration: '40 мин',
+    durationMinutes: 40,
+    priceUZS: 300000,
+    priceFormatted: '300 000 UZS',
+  },
+  {
+    rowNumber: 2,
+    serviceRu: 'Фитобочка, Сауна, Массаж (оздоровительный)',
+    serviceUz: "Fitobochka, Sauna, Massaj (sog'lomlashtiruvchi)",
+    duration: '60 мин',
+    durationMinutes: 60,
+    priceUZS: 320000,
+    priceFormatted: '320 000 UZS',
+  },
+  {
+    rowNumber: 3,
+    serviceRu: 'Фитобочка, Сауна, Массаж (медовый)',
+    serviceUz: 'Fitobochka, Sauna, Massaj (asalli)',
+    duration: '40 мин',
+    durationMinutes: 40,
+    priceUZS: 350000,
+    priceFormatted: '350 000 UZS',
+  },
+  {
+    rowNumber: 4,
+    serviceRu: 'Фитобочка, Сауна, Массаж (медовый)',
+    serviceUz: 'Fitobochka, Sauna, Massaj (asalli)',
+    duration: '60 мин',
+    durationMinutes: 60,
+    priceUZS: 400000,
+    priceFormatted: '400 000 UZS',
+  },
+  {
+    rowNumber: 5,
+    serviceRu: 'Фитобочка, Сауна, Пилинг',
+    serviceUz: 'Fitobochka, Sauna, Piling',
+    duration: '60 мин',
+    durationMinutes: 60,
+    priceUZS: 400000,
+    priceFormatted: '400 000 UZS',
+  },
+  {
+    rowNumber: 6,
+    serviceRu: 'Арома массаж',
+    serviceUz: 'Aroma massaj',
+    optionsTextRu: '40 мин: 350 000 сум / 60 мин: 400 000 сум',
+    optionsTextUz: "40 daq: 350 000 so'm / 60 daq: 400 000 so'm",
+    variants: [
+      { durationMinutes: 40, priceUZS: 350000 },
+      { durationMinutes: 60, priceUZS: 400000 },
+    ],
+  },
+  {
+    rowNumber: 7,
+    serviceRu: 'Точечный массаж',
+    serviceUz: 'Nuqtali massaj',
+    optionsTextRu: '40 мин: 350 000 сум / 60 мин: 400 000 сум',
+    optionsTextUz: "40 daq: 350 000 so'm / 60 daq: 400 000 so'm",
+    variants: [
+      { durationMinutes: 40, priceUZS: 350000 },
+      { durationMinutes: 60, priceUZS: 400000 },
+    ],
+  },
+  {
+    rowNumber: 8,
+    serviceRu: 'Лечебный массаж',
+    serviceUz: 'Davolovchi massaj',
+    optionsTextRu: '40 мин: 350 000 сум / 60 мин: 400 000 сум',
+    optionsTextUz: "40 daq: 350 000 so'm / 60 daq: 400 000 so'm",
+    variants: [
+      { durationMinutes: 40, priceUZS: 350000 },
+      { durationMinutes: 60, priceUZS: 400000 },
+    ],
+  },
+  {
+    rowNumber: 9,
+    serviceRu: 'Хиромассаж',
+    serviceUz: 'Xiromassaj',
+    optionsTextRu: '40 мин: 350 000 сум / 60 мин: 400 000 сум',
+    optionsTextUz: "40 daq: 350 000 so'm / 60 daq: 400 000 so'm",
+    variants: [
+      { durationMinutes: 40, priceUZS: 350000 },
+      { durationMinutes: 60, priceUZS: 400000 },
+    ],
+  },
+  {
+    rowNumber: 10,
+    serviceRu: 'Комбинированный массаж',
+    serviceUz: 'Kombinatsiyalangan massaj',
+    optionsTextRu: '40 мин: 350 000 сум / 60 мин: 400 000 сум',
+    optionsTextUz: "40 daq: 350 000 so'm / 60 daq: 400 000 so'm",
+    variants: [
+      { durationMinutes: 40, priceUZS: 350000 },
+      { durationMinutes: 60, priceUZS: 400000 },
+    ],
+  },
+];
+
+/**
  * Complete Price List Data Bundle
  */
 export const PRICE_LIST_DATA: PriceListData = {
   business: BUSINESS_CONTACTS,
   categories: SERVICE_CATEGORIES,
+  posterRows: POSTER_ROWS,
 };
 
 // Aliases for convenience
 export const businessContacts = BUSINESS_CONTACTS;
 export const serviceCategories = SERVICE_CATEGORIES;
 export const priceListData = PRICE_LIST_DATA;
+export const posterRows = POSTER_ROWS;
 
 /**
  * Format currency amount with space separators and UZS / so'm
@@ -231,7 +339,8 @@ export function formatCurrencyUZS(amount: number, language: 'ru' | 'uz' = 'ru'):
  * Format currency amount with space separators and currency unit
  */
 export function formatPriceUZS(amount: number, language: 'ru' | 'uz' = 'ru'): string {
-  const formatted = Math.round(amount)
+  const rounded = Math.round(Number(amount) || 0);
+  const formatted = rounded
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   return language === 'ru' ? `${formatted} сум` : `${formatted} so'm`;
@@ -241,5 +350,6 @@ export function formatPriceUZS(amount: number, language: 'ru' | 'uz' = 'ru'): st
  * Format duration with localized suffix
  */
 export function formatDuration(minutes: number, language: 'ru' | 'uz' = 'ru'): string {
-  return language === 'ru' ? `${minutes} мин` : `${minutes} daq`;
+  const mins = Math.round(Number(minutes) || 0);
+  return language === 'ru' ? `${mins} мин` : `${mins} daq`;
 }

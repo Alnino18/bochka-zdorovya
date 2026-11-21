@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../context/LanguageContext';
 import { useStore } from '../../context/StoreContext';
 import { X, BookmarkPlus } from 'lucide-react';
@@ -8,13 +8,24 @@ interface AddBookingModalProps {
 }
 
 export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { selectedDate, addBooking } = useStore();
   const [time, setTime] = useState('19:00');
   const [phone, setPhone] = useState('');
   const [clientName, setClientName] = useState('');
   const [partySize, setPartySize] = useState('1');
   const [notes, setNotes] = useState('');
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,12 +43,15 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-booking-title"
       data-testid="add-booking-modal"
       className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-700">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
+          <h3 id="add-booking-title" className="text-base font-bold text-white flex items-center gap-2">
             <BookmarkPlus className="w-5 h-5 text-teal-400" />
             <span>{t('journal.addBooking')}</span>
           </h3>
@@ -45,6 +59,7 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
             type="button"
             onClick={onClose}
             data-testid="cancel-booking-btn"
+            aria-label={t('journal.actions.cancel')}
             className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700"
           >
             <X className="w-5 h-5" />
@@ -54,10 +69,11 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
+              <label htmlFor="booking-time" className="block text-xs font-medium text-slate-300 mb-1">
                 {t('journal.time')} *
               </label>
               <input
+                id="booking-time"
                 type="time"
                 required
                 data-testid="booking-time-input"
@@ -68,10 +84,11 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
+              <label htmlFor="booking-party" className="block text-xs font-medium text-slate-300 mb-1">
                 {t('journal.partySize')}
               </label>
               <input
+                id="booking-party"
                 type="number"
                 min="1"
                 max="20"
@@ -84,10 +101,11 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
+            <label htmlFor="booking-phone" className="block text-xs font-medium text-slate-300 mb-1">
               {t('journal.phone')} *
             </label>
             <input
+              id="booking-phone"
               type="text"
               required
               data-testid="booking-phone-input"
@@ -99,29 +117,31 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
+            <label htmlFor="booking-client-name" className="block text-xs font-medium text-slate-300 mb-1">
               {t('journal.clientName')}
             </label>
             <input
+              id="booking-client-name"
               type="text"
               data-testid="booking-name-input"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
-              placeholder="Жасмин"
+              placeholder={language === 'ru' ? 'Жасмин' : 'Jasmin'}
               className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
-              Примечание
+            <label htmlFor="booking-notes" className="block text-xs font-medium text-slate-300 mb-1">
+              {language === 'ru' ? 'Примечание' : 'Izoh'}
             </label>
             <input
+              id="booking-notes"
               type="text"
               data-testid="booking-notes-input"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="2 к, массаж 60 мин"
+              placeholder={language === 'ru' ? '2 к, массаж 60 мин' : '2 k, massaj 60 daq'}
               className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500"
             />
           </div>

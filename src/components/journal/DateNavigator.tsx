@@ -8,14 +8,16 @@ export const DateNavigator: React.FC = () => {
   const { selectedDate, setSelectedDate, currentRecord } = useStore();
 
   const handlePrevDay = () => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() - 1);
+    const parts = selectedDate.split('-').map(Number);
+    const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+    d.setUTCDate(d.getUTCDate() - 1);
     setSelectedDate(d.toISOString().slice(0, 10));
   };
 
   const handleNextDay = () => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() + 1);
+    const parts = selectedDate.split('-').map(Number);
+    const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+    d.setUTCDate(d.getUTCDate() + 1);
     setSelectedDate(d.toISOString().slice(0, 10));
   };
 
@@ -71,6 +73,7 @@ export const DateNavigator: React.FC = () => {
           type="date"
           value={selectedDate}
           data-testid="date-picker-input"
+          aria-label={t('journal.dateLabel')}
           onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
           className="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-teal-500"
         />

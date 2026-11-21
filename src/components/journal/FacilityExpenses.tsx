@@ -36,11 +36,13 @@ export const FacilityExpenses: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Cleaning Expense */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">
+          <label htmlFor="input-cleaning" className="block text-xs font-medium text-slate-300 mb-1">
             {t('journal.cleaning')} (UZS)
           </label>
           <input
+            id="input-cleaning"
             type="number"
+            min="0"
             value={cleaning}
             data-testid="input-cleaning-expense"
             onChange={handleCleaningChange}
@@ -50,11 +52,13 @@ export const FacilityExpenses: React.FC = () => {
 
         {/* Other Expense */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">
+          <label htmlFor="input-other" className="block text-xs font-medium text-slate-300 mb-1">
             {t('journal.otherExpenses')} (UZS)
           </label>
           <input
+            id="input-other"
             type="number"
+            min="0"
             value={other}
             data-testid="input-other-expense"
             onChange={handleOtherChange}
@@ -64,12 +68,14 @@ export const FacilityExpenses: React.FC = () => {
 
         {/* Bar Sales */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
+          <label htmlFor="input-bar" className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
             <Coffee className="w-3.5 h-3.5 text-amber-400" />
             <span>{t('journal.barRevenue')} (UZS)</span>
           </label>
           <input
+            id="input-bar"
             type="number"
+            min="0"
             value={barRevenue}
             data-testid="input-bar-revenue"
             onChange={handleBarRevenueChange}

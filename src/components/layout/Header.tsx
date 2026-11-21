@@ -24,6 +24,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               <img 
                 src="/icons/icon.svg" 
                 alt="Бочка Здоровья" 
+                width="40"
+                height="40"
                 className="w-full h-full object-cover" 
               />
             </div>
@@ -42,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
             {/* Install PWA button (if available) */}
             {canInstall && (
               <button
+                type="button"
                 onClick={triggerInstall}
                 aria-label={t('app.installApp')}
                 title={t('app.installApp')}
@@ -56,7 +59,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
             <a
               href="tel:+998970020404"
               data-testid="header-phone-link"
-              title="Позвонить: +998 97 002-04-04"
+              aria-label={`${t('priceList.callAction')}: +998 97 002-04-04`}
+              title={`${t('priceList.callAction')}: +998 97 002-04-04`}
               className="inline-flex items-center justify-center w-8 h-8 sm:w-auto sm:px-2.5 sm:py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition-colors text-xs font-medium gap-1.5"
             >
               <Phone className="w-3.5 h-3.5" />
@@ -68,6 +72,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               target="_blank"
               rel="noopener noreferrer"
               data-testid="header-instagram-link"
+              aria-label="Instagram @Bochka_zdorovya"
               title="Instagram @Bochka_zdorovya"
               className="inline-flex items-center justify-center w-8 h-8 sm:w-auto sm:px-2.5 sm:py-1 rounded-lg bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 transition-colors text-xs font-medium gap-1.5"
             >
@@ -116,9 +121,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
         {/* Desktop Navigation Tabs (shown on md+ screens) */}
         {onTabChange && (
-          <nav className="hidden md:flex items-center space-x-1 py-1.5 border-t border-slate-800/80">
+          <nav className="hidden md:flex items-center space-x-1 py-1.5 border-t border-slate-800/80" aria-label="Desktop Navigation">
             <button
+              type="button"
               onClick={() => onTabChange('journal')}
+              aria-current={activeTab === 'journal' ? 'page' : undefined}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 activeTab === 'journal'
                   ? 'bg-teal-600/30 text-teal-300 border border-teal-500/40'
@@ -128,7 +135,9 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               {t('nav.journal')}
             </button>
             <button
+              type="button"
               onClick={() => onTabChange('pricelist')}
+              aria-current={activeTab === 'pricelist' || activeTab === 'prices' ? 'page' : undefined}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 activeTab === 'pricelist' || activeTab === 'prices'
                   ? 'bg-teal-600/30 text-teal-300 border border-teal-500/40'
@@ -138,7 +147,9 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               {t('nav.priceList')}
             </button>
             <button
+              type="button"
               onClick={() => onTabChange('summary')}
+              aria-current={activeTab === 'summary' ? 'page' : undefined}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 activeTab === 'summary'
                   ? 'bg-teal-600/30 text-teal-300 border border-teal-500/40'

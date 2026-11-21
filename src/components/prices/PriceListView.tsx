@@ -180,6 +180,7 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery('')}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
               aria-label="Clear search"
@@ -292,9 +293,10 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             {searchQuery
               ? `"${searchQuery}"`
-              : 'Попробуйте изменить параметры фильтрации'}
+              : (language === 'ru' ? 'Попробуйте изменить параметры фильтрации' : "Filtr parametrlarini o'zgartirib ko'ring")}
           </p>
           <button
+            type="button"
             onClick={resetFilters}
             className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md"
           >
@@ -331,7 +333,7 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
 
                     {category.posterItems && category.posterItems.length > 0 && (
                       <span className="text-[10px] text-slate-500">
-                        Позиции: {category.posterItems.join(', ')}
+                        {language === 'ru' ? 'Позиции:' : 'Pozitsiyalar:'} {category.posterItems.join(', ')}
                       </span>
                     )}
                   </div>
@@ -367,9 +369,9 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    {category.options.map((option, idx) => (
+                    {category.options.map((option) => (
                       <div
-                        key={idx}
+                        key={`${category.id}-${option.durationMinutes}-${option.priceUZS}`}
                         data-testid={`price-option-${category.categoryNumber}-${option.durationMinutes}`}
                         className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/70 border border-slate-700/50 hover:border-slate-600 transition-colors"
                       >
@@ -395,6 +397,7 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
                   <div className="pt-2">
                     <a
                       href={BUSINESS_CONTACTS.phoneTel}
+                      aria-label={`${t('priceList.orderBooking')} (${categoryTitle})`}
                       className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-700/50 hover:bg-teal-600 text-slate-300 hover:text-white text-xs font-semibold transition-all group/btn"
                     >
                       <Phone className="w-3.5 h-3.5 text-teal-400 group-hover/btn:text-white transition-colors" />
@@ -423,7 +426,9 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
               {t('priceList.contactsHeader')}
             </h4>
             <p className="text-xs text-slate-400 mt-1">
-              г. Ташкент • Ежедневно с 09:00 до 23:00 • Запись по телефону или в Instagram
+              {language === 'ru'
+                ? 'г. Ташкент • Ежедневно с 09:00 до 23:00 • Запись по телефону или в Instagram'
+                : 'Toshkent sh. • Har kuni 09:00 dan 23:00 gacha • Telefon yoki Instagram orqali yozilish'}
             </p>
           </div>
 

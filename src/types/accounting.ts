@@ -50,6 +50,8 @@ export interface DaySummary {
   grossTotalRevenue: number;
   totalMasterPayouts: number;
   cleaningExpenses: number;
+  otherExpenses?: number;
+  facilityExpenses?: number;
   totalExpenses: number;
   netBalance: number;     // Revenue + Bar - Cleaning
   netSalonProfit: number; // Net Balance - Master Payouts

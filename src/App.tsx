@@ -95,7 +95,9 @@ const AppContent: React.FC = () => {
                       className="col-span-full py-8 text-center text-slate-500 bg-slate-800/40 border border-slate-700/50 rounded-xl"
                       data-testid="empty-masters-placeholder"
                     >
-                      Нет добавленных мастеров на эту дату
+                      {language === 'ru'
+                        ? 'Нет добавленных мастеров на эту дату'
+                        : "Ushbu sana uchun ustalar qo'shilmagan"}
                     </div>
                   ) : (
                     masters.map((master) => (
@@ -157,7 +159,11 @@ const AppContent: React.FC = () => {
         <div className="mt-6 bg-slate-800/50 border border-slate-700/70 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-center sm:text-left">
             <h4 className="text-sm font-bold text-white">{t('priceList.contactsHeader')}</h4>
-            <p className="text-xs text-slate-400 mt-0.5">г. Ташкент • Ежедневно с 09:00 до 23:00</p>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {language === 'ru'
+                ? 'г. Ташкент • Ежедневно с 09:00 до 23:00'
+                : 'Toshkent sh. • Har kuni 09:00 dan 23:00 gacha'}
+            </p>
           </div>
           <div data-testid="contact-card-actions" className="flex flex-wrap items-center gap-3">
             <a

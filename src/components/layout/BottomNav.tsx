@@ -43,8 +43,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
           return (
             <button
               key={tab.id}
+              type="button"
               onClick={() => onTabChange(tab.id)}
               data-testid={`bottom-nav-${tab.id}`}
+              aria-label={tab.label}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex flex-col items-center justify-center py-1 px-1 rounded-lg transition-all ${
                 isActive
                   ? 'text-teal-400 font-semibold'
