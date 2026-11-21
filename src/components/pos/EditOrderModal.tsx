@@ -121,20 +121,23 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
       role="dialog"
       aria-modal="true"
       data-testid="edit-order-modal"
-      className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     >
-      <div className="bg-slate-900 border border-emerald-500/30 rounded-3xl w-full max-w-xl p-5 sm:p-6 shadow-2xl space-y-5 my-8">
+      <div className="bg-[#1c1c1e] text-white border border-white/10 rounded-[26px] w-full max-w-xl p-5 sm:p-6 shadow-2xl space-y-5 my-8">
+        {/* iOS Grabber Pill */}
+        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto -mt-1 mb-1" />
+
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+            <div className="w-9 h-9 rounded-[14px] bg-[#30d158]/20 text-[#30d158] flex items-center justify-center border border-[#30d158]/30">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-white">
+              <h3 className="text-base font-bold text-white">
                 {language === 'ru' ? 'Редактирование заказа' : 'Buyurtmani tahrirlash'}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-white/50">
                 {language === 'ru' ? 'Изменение услуги, массажистки, цены и бара' : 'Xizmat, massajistka, narx va barni o\'zgartirish'}
               </p>
             </div>

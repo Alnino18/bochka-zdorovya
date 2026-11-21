@@ -27,16 +27,16 @@ export const FacilityExpenses: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4">
-      <div className="flex items-center gap-2 pb-2 border-b border-slate-700/60">
-        <Sparkles className="w-4 h-4 text-amber-400" />
+    <div className="bg-[#1c1c1e] border border-white/10 rounded-[22px] p-5 shadow-lg space-y-4">
+      <div className="flex items-center gap-2 pb-2 border-b border-white/10">
+        <Sparkles className="w-4 h-4 text-[#ffd60a]" />
         <h4 className="text-sm font-bold text-white">{t('journal.expensesSection')} & {t('journal.barSection')}</h4>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Cleaning Expense */}
         <div>
-          <label htmlFor="input-cleaning" className="block text-xs font-medium text-slate-300 mb-1">
+          <label htmlFor="input-cleaning" className="block text-xs font-medium text-white/70 mb-1">
             {t('journal.cleaning')} (UZS)
           </label>
           <input
@@ -46,13 +46,13 @@ export const FacilityExpenses: React.FC = () => {
             value={cleaning}
             data-testid="input-cleaning-expense"
             onChange={handleCleaningChange}
-            className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500"
+            className="w-full bg-[#2c2c2e] border border-white/10 text-sm text-white rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-[#ffd60a]"
           />
         </div>
 
         {/* Other Expense */}
         <div>
-          <label htmlFor="input-other" className="block text-xs font-medium text-slate-300 mb-1">
+          <label htmlFor="input-other" className="block text-xs font-medium text-white/70 mb-1">
             {t('journal.otherExpenses')} (UZS)
           </label>
           <input
@@ -62,14 +62,14 @@ export const FacilityExpenses: React.FC = () => {
             value={other}
             data-testid="input-other-expense"
             onChange={handleOtherChange}
-            className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500"
+            className="w-full bg-[#2c2c2e] border border-white/10 text-sm text-white rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-[#ffd60a]"
           />
         </div>
 
         {/* Bar Sales */}
         <div>
-          <label htmlFor="input-bar" className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
-            <Coffee className="w-3.5 h-3.5 text-amber-400" />
+          <label htmlFor="input-bar" className="block text-xs font-medium text-white/70 mb-1 flex items-center gap-1">
+            <Coffee className="w-3.5 h-3.5 text-[#ffd60a]" />
             <span>{t('journal.barRevenue')} (UZS)</span>
           </label>
           <input
@@ -79,7 +79,7 @@ export const FacilityExpenses: React.FC = () => {
             value={barRevenue}
             data-testid="input-bar-revenue"
             onChange={handleBarRevenueChange}
-            className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500"
+            className="w-full bg-[#2c2c2e] border border-white/10 text-sm text-white rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-[#ffd60a]"
           />
         </div>
       </div>

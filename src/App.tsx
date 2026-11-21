@@ -32,7 +32,7 @@ const AppContent: React.FC = () => {
   }, [language]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col w-full overflow-x-hidden selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-black text-[#f5f5f7] flex flex-col w-full overflow-x-hidden selection:bg-[#30d158] selection:text-black">
       {/* Offline Status Indicator */}
       <OfflineBadge />
 
@@ -41,55 +41,53 @@ const AppContent: React.FC = () => {
 
       {/* Main Responsive Content Shell */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8">
-        {/* Admin POS Terminal Luxury Hero Banner */}
-        <section className="mb-6 bg-gradient-to-r from-slate-950 via-slate-900/90 to-emerald-950/40 border border-emerald-500/30 rounded-3xl p-4 sm:p-6 shadow-2xl shadow-emerald-950/20 backdrop-blur-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+        {/* iOS Hero Card */}
+        <section className="mb-6 bg-[#1c1c1e] border border-white/10 rounded-[26px] p-4 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-[#30d158]/5 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16"></div>
           
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm">
-                  <Sparkles className="w-3 h-3 text-emerald-400" />
-                  <span>Admin Luxury POS • v5.0</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#30d158]/15 text-[#30d158] border border-[#30d158]/30 shadow-sm">
+                  <Sparkles className="w-3 h-3 text-[#30d158]" />
+                  <span>{t('app.subtitle')}</span>
                 </span>
 
                 {/* Glowing Live Tashkent Clock Hero Badge */}
                 <span
                   data-testid="app-tashkent-clock-badge"
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-900/90 text-slate-200 border border-emerald-500/30 shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#2c2c2e] text-white/90 border border-white/10 shadow-sm"
                 >
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#30d158] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#30d158]"></span>
                   </span>
                   <span>{language === 'ru' ? '🇺🇿 Ташкент:' : '🇺🇿 Тошкент:'}</span>
-                  <span className="font-mono font-black text-emerald-300 tracking-wider">
+                  <span className="font-mono font-bold text-[#30d158] tracking-wider">
                     {tashkentTime}
                   </span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-slate-400">
+                  <span className="text-white/30">•</span>
+                  <span className="text-white/60">
                     {tashkentDateStr}
                   </span>
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                 {t('app.title')}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                {language === 'ru'
-                  ? 'Высокоскоростной терминал заказов для администраторов, постоянный состав массажисток и учет в реальном времени'
-                  : "Administratorlar uchun tezkor buyurtma terminali, doimiy massajistkalar tarkibi va real vaqtdagi kassa hisobi"}
+              <p className="text-sm sm:text-base text-white/70 mt-1 font-semibold">
+                {t('app.subtitle')}
               </p>
             </div>
 
             <div className="flex flex-wrap lg:flex-col items-start lg:items-end gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-[#30d158]/15 text-[#30d158] border border-[#30d158]/30 font-bold shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#30d158]" />
                 <span>{t('app.online')}</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 text-slate-300 border border-slate-800 font-semibold shadow-sm">
-                <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-[#2c2c2e] text-white/80 border border-white/10 font-semibold shadow-sm">
+                <ShieldCheck className="w-3.5 h-3.5 text-white/60" />
                 <span>{language === 'ru' ? 'Язык: Русский' : "Til: O'zbekcha"}</span>
               </span>
             </div>

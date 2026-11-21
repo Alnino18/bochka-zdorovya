@@ -154,7 +154,7 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
 
     // Uzbek labels in header and journal
     expect(screen.getAllByText('Bochka Zdorovya')[0]).toBeInTheDocument();
-    expect(screen.getByText('Buyurtma terminali va kassa hisobi')).toBeInTheDocument();
+    expect(screen.getAllByText('Kassa')[0]).toBeInTheDocument();
 
     // Morning admin adds order in Uzbek UI
     const iroChip = screen.getByRole('radio', { name: /Iro/i });
@@ -166,7 +166,7 @@ describe('Tier 4 - Real-World Administrative Scenarios (8 Scenarios)', () => {
     // 2. Evening handover: Russian admin switches language to RU via Header
     fireEvent.click(screen.getByTestId('lang-btn-ru'));
     expect(screen.getAllByText('Бочка Здоровья')[0]).toBeInTheDocument();
-    expect(screen.getByText('Терминал заказов и кассовый учет')).toBeInTheDocument();
+    expect(screen.getAllByText('Касса')[0]).toBeInTheDocument();
 
     // Evening admin adds order in Russian UI
     const maxChip = screen.getByRole('radio', { name: /Мах/i });

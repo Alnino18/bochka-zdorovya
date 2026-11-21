@@ -8,6 +8,7 @@ import { AddMasterModal } from '../journal/AddMasterModal';
 import { EditOrderModal } from './EditOrderModal';
 import { TelegramReportModal } from './TelegramReportModal';
 import { PriceEditorModal } from '../prices/PriceEditorModal';
+import { BarEditorModal } from './BarEditorModal';
 import { ServiceOrderItem, MasterEntry } from '../../types/accounting';
 import {
   User,
@@ -45,6 +46,7 @@ export const PosOrderScreen: React.FC = () => {
     addOrder,
     removeOrder,
     deleteMaster,
+    removeStaffMember,
     updateExpenses,
     addBarSale,
     updateBar,
@@ -53,10 +55,28 @@ export const PosOrderScreen: React.FC = () => {
 
   const masters = currentRecord?.masters || [];
 
+  const [isBarEditorOpen, setIsBarEditorOpen] = useState(false);
+
   // Step 1: Selected Masseur (Massajistka)
   const [selectedMasterId, setSelectedMasterId] = useState<string>(() => {
     return masters.length > 0 ? masters[0].id : '';
   });
+
+  const handleDeleteMaster = (master: MasterEntry) => {
+    const displayName = language === 'uz' && master.nameUz ? master.nameUz : master.name;
+    const confirmMsg = language === 'ru'
+      ? `Удалить массажистку "${displayName}" из постоянного состава и текущей смены?`
+      : `"${displayName}" massajistkani doimiy ro'yxat va smenadan butunlay o'chirishni tasdiqlaysizmi?`;
+
+    if (window.confirm(confirmMsg)) {
+      removeStaffMember(master.name);
+      removeStaffMember(master.id);
+      deleteMaster(selectedDate, master.id);
+      if (selectedMasterId === master.id) {
+        setSelectedMasterId('');
+      }
+    }
+  };
 
   // Step 2: Selected Service or Custom
   interface SelectedServiceState {
@@ -240,19 +260,19 @@ export const PosOrderScreen: React.FC = () => {
         </div>
       )}
 
-      {/* Main Luxury POS Station Card */}
-      <div className="bg-gradient-to-b from-slate-900/95 via-slate-900/90 to-slate-950/95 border border-emerald-500/30 rounded-3xl p-4 sm:p-6 shadow-2xl shadow-emerald-950/20 backdrop-blur-md space-y-6">
+      {/* Main Luxury iOS Station Card */}
+      <div className="bg-[#1c1c1e] border border-white/10 rounded-[26px] p-4 sm:p-6 shadow-2xl space-y-6">
         
         {/* Terminal Header & Prominent Quick Action Buttons */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-white/10 gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shadow-inner">
+            <div className="w-11 h-11 rounded-[16px] bg-[#30d158]/20 text-[#30d158] flex items-center justify-center border border-[#30d158]/30 shadow-inner">
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                <ShieldCheck className="w-3 h-3" />
-                <span>Admin POS • Luxury Fast Flow</span>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white/80 border border-white/10">
+                <ShieldCheck className="w-3 h-3 text-[#30d158]" />
+                <span>Бочка Здоровья</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                 {t('pos.title')}
@@ -267,7 +287,7 @@ export const PosOrderScreen: React.FC = () => {
               type="button"
               onClick={() => setIsTelegramModalOpen(true)}
               data-testid="send-telegram-btn"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-black text-xs shadow-lg shadow-sky-950/50 border border-sky-400/40 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[16px] bg-[#0a84ff] hover:bg-[#0071e3] text-white font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95"
               title={language === 'ru' ? 'Отправить отчет в Telegram' : 'Hisobotni Telegramga yuborish'}
             >
               <Send className="w-4 h-4" />
@@ -279,7 +299,7 @@ export const PosOrderScreen: React.FC = () => {
               type="button"
               onClick={() => setIsPriceEditorModalOpen(true)}
               data-testid="open-price-editor-btn"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xs shadow-lg shadow-amber-950/50 border border-amber-400/40 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[16px] bg-[#ffd60a] hover:bg-[#ffdf33] text-black font-extrabold text-xs shadow-md transition-all cursor-pointer active:scale-95"
               title={language === 'ru' ? 'Редактировать прейскурант' : 'Preyskurantni tahrirlash'}
             >
               <Settings className="w-4 h-4" />
@@ -291,11 +311,23 @@ export const PosOrderScreen: React.FC = () => {
               type="button"
               onClick={() => setIsAddMasterModalOpen(true)}
               data-testid="quick-massajistkas-btn"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-950/50 border border-emerald-400/40 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[16px] bg-[#30d158] hover:bg-[#28b84d] text-black font-extrabold text-xs shadow-md transition-all cursor-pointer active:scale-95"
               title={language === 'ru' ? 'Массажистки' : 'Массажисткалар'}
             >
               <Users className="w-4 h-4" />
               <span>👥 {language === 'ru' ? 'Массажистки' : 'Массажисткалар'}</span>
+            </button>
+
+            {/* Quick Button 4: 🍹 Бар */}
+            <button
+              type="button"
+              onClick={() => setIsBarEditorOpen(true)}
+              data-testid="quick-bar-editor-btn"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[16px] bg-[#ff9f0a] hover:bg-[#e08900] text-black font-extrabold text-xs shadow-md transition-all cursor-pointer active:scale-95"
+              title={language === 'ru' ? 'Редактировать бар' : 'Barni tahrirlash'}
+            >
+              <Coffee className="w-4 h-4" />
+              <span>🍹 {language === 'ru' ? 'Бар' : 'Bar'}</span>
             </button>
 
             {/* Quick Copy Report Button */}
@@ -303,24 +335,24 @@ export const PosOrderScreen: React.FC = () => {
               type="button"
               onClick={handleCopyReport}
               data-testid="copy-report-btn"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs transition-all border border-slate-700 cursor-pointer shadow-sm active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[16px] bg-[#2c2c2e] hover:bg-[#3a3a3c] text-white/90 hover:text-white font-bold text-xs transition-all border border-white/10 cursor-pointer shadow-sm active:scale-95"
               title={language === 'ru' ? 'Скопировать отчет' : 'Hisobotdan nusxa olish'}
             >
-              <Copy className="w-3.5 h-3.5 text-sky-400" />
+              <Copy className="w-3.5 h-3.5 text-white/80" />
               <span>{language === 'ru' ? 'Копия' : 'Nusxa'}</span>
             </button>
 
             {/* Shift Snapshot Stats Badges */}
             <div className="flex items-center gap-2 ml-auto lg:ml-0 text-xs">
-              <div className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 shadow-inner">
-                <span className="text-slate-500 mr-1.5">{t('pos.activeMasters')}:</span>
+              <div className="px-3 py-1.5 rounded-[14px] bg-[#2c2c2e] border border-white/5 text-white/80 shadow-inner">
+                <span className="text-white/50 mr-1.5">{t('pos.activeMasters')}:</span>
                 <span className="font-bold text-white" data-testid="pos-active-masters-count">
                   {masters.length}
                 </span>
               </div>
-              <div className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 shadow-inner">
-                <span className="text-slate-500 mr-1.5">{t('journal.totalClients')}:</span>
-                <span className="font-bold text-emerald-400" data-testid="pos-header-clients-count">
+              <div className="px-3 py-1.5 rounded-[14px] bg-[#2c2c2e] border border-white/5 text-white/80 shadow-inner">
+                <span className="text-white/50 mr-1.5">{t('journal.totalClients')}:</span>
+                <span className="font-bold text-[#30d158]" data-testid="pos-header-clients-count">
                   {summary.totalClients}
                 </span>
               </div>
@@ -331,24 +363,24 @@ export const PosOrderScreen: React.FC = () => {
         {/* STEP 1: SELECT MASSAJISTKA */}
         <div className="space-y-3.5">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xs font-black border border-emerald-500/30">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-[#30d158] flex items-center gap-2">
+              <span className="w-6 h-6 rounded-[8px] bg-[#30d158]/20 text-[#30d158] flex items-center justify-center text-xs font-black border border-[#30d158]/30">
                 1
               </span>
               <span>{t('pos.step1')}</span>
             </h3>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+              <span className="text-xs text-white/50 font-medium hidden sm:inline">
                 {masters.length} {language === 'ru' ? 'массажисток готово' : 'massajistka tayyor'}
               </span>
               <button
                 type="button"
                 onClick={() => setIsAddMasterModalOpen(true)}
                 data-testid="add-master-btn"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-[#30d158] hover:bg-[#28b84d] text-black text-xs font-bold transition-all shadow-md cursor-pointer active:scale-95"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>{t('pos.quickAddMaster')}</span>
               </button>
             </div>
@@ -357,13 +389,13 @@ export const PosOrderScreen: React.FC = () => {
           {masters.length === 0 ? (
             <div
               data-testid="pos-no-masters"
-              className="p-6 text-center text-slate-400 bg-slate-950/50 border border-slate-800 rounded-3xl"
+              className="p-6 text-center text-white/50 bg-[#2c2c2e] border border-white/5 rounded-[22px]"
             >
               <p className="text-sm">{t('pos.noMastersOnShift')}</p>
               <button
                 type="button"
                 onClick={() => setIsAddMasterModalOpen(true)}
-                className="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer"
+                className="mt-3 px-4 py-2 bg-[#30d158] hover:bg-[#28b84d] text-black text-xs font-bold rounded-[14px] shadow-md cursor-pointer"
               >
                 {t('pos.quickAddMaster')}
               </button>
@@ -374,56 +406,72 @@ export const PosOrderScreen: React.FC = () => {
                 const isSelected = activeMaster?.id === master.id;
                 const displayName = language === 'uz' && master.nameUz ? master.nameUz : master.name;
                 return (
-                  <button
-                    key={master.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    onClick={() => setSelectedMasterId(master.id)}
-                    data-testid={`pos-masseur-chip-${master.id}`}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl font-bold transition-all duration-150 border cursor-pointer select-none active:scale-95 ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-emerald-900/90 via-teal-900/80 to-slate-900 text-white border-emerald-300 shadow-xl shadow-emerald-950/60 ring-2 ring-emerald-400/50 scale-102'
-                        : 'bg-slate-950/80 hover:bg-slate-900 text-slate-300 hover:text-white border-slate-800 hover:border-emerald-500/30 shadow-md'
-                    }`}
-                  >
-                    <div
-                      className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-sm shadow-inner transition-colors flex-shrink-0 ${
+                  <div key={master.id} className="relative group">
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => setSelectedMasterId(master.id)}
+                      data-testid={`pos-masseur-chip-${master.id}`}
+                      className={`flex items-center gap-3 px-4 py-2.5 rounded-[20px] font-bold transition-all border cursor-pointer select-none active:scale-95 ${
                         isSelected
-                          ? 'bg-emerald-500 text-slate-950 shadow-emerald-400/50'
-                          : 'bg-slate-900 text-emerald-400 border border-slate-800'
+                          ? 'bg-[#2c2c2e] text-white border-white/20 shadow-xl ring-2 ring-[#30d158]/50 scale-102'
+                          : 'bg-[#1c1c1e] hover:bg-[#252528] text-white/90 border-white/10 shadow-md'
                       }`}
                     >
-                      {isSelected ? <Check className="w-5 h-5 stroke-[3]" /> : displayName.charAt(0)}
-                    </div>
-                    <div className="flex flex-col items-start text-left min-w-0">
-                      <span className="font-extrabold text-sm sm:text-base text-white tracking-tight leading-tight">
-                        {displayName}
-                      </span>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span
-                          data-testid={`pos-masseur-chip-clients-${master.id}`}
-                          className={`text-[11px] px-2 py-0.5 rounded-lg font-bold ${
-                            isSelected
-                              ? 'bg-emerald-950 text-emerald-200 border border-emerald-500/30'
-                              : 'bg-slate-900 text-slate-400 border border-slate-800'
-                          }`}
-                        >
-                          {master.clientCount} {language === 'ru' ? 'кл' : 'mijoz'}
-                        </span>
-                        <span
-                          data-testid={`pos-masseur-chip-revenue-${master.id}`}
-                          className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg ${
-                            isSelected
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
-                              : 'bg-slate-900/90 text-emerald-400/80 border border-slate-800'
-                          }`}
-                        >
-                          {formatCurrencyUZS(master.revenue, language)}
-                        </span>
+                      <div
+                        className={`w-9 h-9 rounded-[14px] flex items-center justify-center font-black text-sm shadow-inner transition-colors flex-shrink-0 ${
+                          isSelected
+                            ? 'bg-[#30d158] text-black font-extrabold'
+                            : 'bg-[#2c2c2e] text-[#30d158] border border-white/10'
+                        }`}
+                      >
+                        {isSelected ? <Check className="w-5 h-5 stroke-[3]" /> : displayName.charAt(0)}
                       </div>
-                    </div>
-                  </button>
+                      <div className="flex flex-col items-start text-left min-w-0 pr-4">
+                        <span className="font-extrabold text-sm sm:text-base text-white tracking-tight leading-tight">
+                          {displayName}
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span
+                            data-testid={`pos-masseur-chip-clients-${master.id}`}
+                            className={`text-[11px] px-2 py-0.5 rounded-[8px] font-bold ${
+                              isSelected
+                                ? 'bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30'
+                                : 'bg-[#2c2c2e] text-white/60 border border-white/5'
+                            }`}
+                          >
+                            {master.clientCount} {language === 'ru' ? 'кл' : 'mijoz'}
+                          </span>
+                          <span
+                            data-testid={`pos-masseur-chip-revenue-${master.id}`}
+                            className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-[8px] ${
+                              isSelected
+                                ? 'bg-[#30d158]/25 text-[#30d158] border border-[#30d158]/40'
+                                : 'bg-[#2c2c2e] text-[#30d158] border border-white/5'
+                            }`}
+                          >
+                            {formatCurrencyUZS(master.revenue, language)}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Delete Massajistka Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteMaster(master);
+                      }}
+                      data-testid={`delete-masseur-btn-${master.id}`}
+                      aria-label={language === 'ru' ? `Удалить ${displayName}` : `${displayName}ni o'chirish`}
+                      title={language === 'ru' ? `Удалить ${displayName}` : `${displayName}ni o'chirish`}
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-[#ff453a] hover:bg-red-500 active:scale-90 text-white flex items-center justify-center shadow-lg transition-all cursor-pointer border border-white/20 z-10"
+                    >
+                      <Trash2 className="w-3 h-3 stroke-[2.5]" />
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -431,15 +479,15 @@ export const PosOrderScreen: React.FC = () => {
         </div>
 
         {/* STEP 2: SELECT SERVICE FROM MENU */}
-        <div className="space-y-3 pt-3 border-t border-slate-800">
+        <div className="space-y-3 pt-3 border-t border-white/10">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xs font-black border border-emerald-500/30">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-[#30d158] flex items-center gap-2">
+              <span className="w-6 h-6 rounded-[8px] bg-[#30d158]/20 text-[#30d158] flex items-center justify-center text-xs font-black border border-[#30d158]/30">
                 2
               </span>
               <span>{t('pos.step2')}</span>
             </h3>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-white/50">
               {services.length} {language === 'ru' ? 'категорий услуг' : 'toifalar'}
             </span>
           </div>
@@ -453,24 +501,24 @@ export const PosOrderScreen: React.FC = () => {
                 <div
                   key={category.id}
                   data-testid={`pos-service-category-${category.categoryNumber}`}
-                  className="bg-slate-950/85 border border-slate-800 hover:border-emerald-500/40 rounded-3xl p-3.5 flex flex-col justify-between space-y-3 transition-all shadow-md hover:shadow-emerald-950/30"
+                  className="bg-[#1c1c1e] border border-white/10 hover:border-white/20 rounded-[20px] p-3.5 flex flex-col justify-between space-y-3 transition-all shadow-md"
                 >
                   <div className="flex items-start gap-2.5">
-                    <div className="p-2 rounded-2xl bg-slate-900 border border-slate-800 flex-shrink-0 shadow-inner">
+                    <div className="p-2 rounded-[14px] bg-[#2c2c2e] border border-white/10 flex-shrink-0 shadow-inner">
                       {getCategoryIcon(category.categoryNumber)}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">
+                      <div className="text-[10px] font-extrabold uppercase text-white/40 tracking-wider">
                         #{category.categoryNumber}
                       </div>
-                      <h4 className="text-xs sm:text-sm font-black text-white leading-tight line-clamp-2">
+                      <h4 className="text-xs sm:text-sm font-bold text-white leading-tight line-clamp-2">
                         {catTitle}
                       </h4>
                     </div>
                   </div>
 
                   {/* Options Duration / Price Buttons */}
-                  <div className="grid grid-cols-1 gap-2 pt-1 border-t border-slate-800/80">
+                  <div className="grid grid-cols-1 gap-2 pt-1 border-t border-white/10">
                     {category.options.map((option) => {
                       const isOptionSelected =
                         !selectedService.isCustom &&
@@ -493,17 +541,17 @@ export const PosOrderScreen: React.FC = () => {
                             });
                           }}
                           data-testid={`pos-service-btn-${category.categoryNumber}-${option.durationMinutes}`}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-bold transition-all border cursor-pointer active:scale-98 ${
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-[14px] text-xs font-bold transition-all border cursor-pointer active:scale-98 ${
                             isOptionSelected
-                              ? 'bg-emerald-600 text-white border-emerald-400 shadow-lg shadow-emerald-950/50 ring-2 ring-emerald-400/60'
-                              : 'bg-slate-900/90 text-slate-200 hover:text-white hover:bg-slate-800 border-slate-800'
+                              ? 'bg-[#30d158] text-black font-extrabold border-white/20 shadow-lg ring-2 ring-[#30d158]/60'
+                              : 'bg-[#2c2c2e] text-white/90 hover:text-white hover:bg-[#3a3a3c] border-white/5'
                           }`}
                         >
                           <span className="flex items-center gap-1.5 font-medium">
-                            <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                            <Clock className={`w-3.5 h-3.5 ${isOptionSelected ? 'text-black' : 'text-[#30d158]'}`} />
                             <span>{formatDuration(option.durationMinutes, language)}</span>
                           </span>
-                          <span className="font-mono font-black text-emerald-300">
+                          <span className={`font-mono font-bold ${isOptionSelected ? 'text-black' : 'text-[#30d158]'}`}>
                             {formatCurrencyUZS(option.priceUZS, language)}
                           </span>
                         </button>
@@ -516,7 +564,7 @@ export const PosOrderScreen: React.FC = () => {
           </div>
 
           {/* Custom Amount Option */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-3xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+          <div className="bg-[#1c1c1e] border border-white/10 rounded-[20px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -531,10 +579,10 @@ export const PosOrderScreen: React.FC = () => {
                   });
                 }}
                 data-testid="pos-custom-amount-btn"
-                className={`px-4 py-2 rounded-2xl text-xs font-black border transition-all cursor-pointer shadow-sm active:scale-95 ${
+                className={`px-4 py-2 rounded-[14px] text-xs font-bold border transition-all cursor-pointer shadow-sm active:scale-95 ${
                   selectedService.isCustom
-                    ? 'bg-amber-600 text-white border-amber-400 shadow-md ring-2 ring-amber-400/50'
-                    : 'bg-slate-900 text-amber-300 hover:text-white hover:bg-slate-800 border-slate-800'
+                    ? 'bg-[#ffd60a] text-black font-extrabold border-white/20 shadow-md ring-2 ring-[#ffd60a]/50'
+                    : 'bg-[#2c2c2e] text-[#ffd60a] hover:text-white hover:bg-[#3a3a3c] border-white/5'
                 }`}
               >
                 <span>{t('pos.customAmount')}</span>
@@ -556,7 +604,7 @@ export const PosOrderScreen: React.FC = () => {
                         price: preset,
                       });
                     }}
-                    className="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-[11px] font-mono font-bold text-slate-300 border border-slate-800 cursor-pointer transition-all active:scale-95"
+                    className="px-2.5 py-1 rounded-[10px] bg-[#2c2c2e] hover:bg-[#3a3a3c] text-[11px] font-mono font-bold text-white/80 border border-white/5 cursor-pointer transition-all active:scale-95"
                   >
                     {preset / 1000}k
                   </button>
@@ -565,7 +613,7 @@ export const PosOrderScreen: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 font-bold">UZS:</span>
+              <span className="text-xs text-white/50 font-bold">UZS:</span>
               <input
                 type="number"
                 value={customPriceInput}
@@ -580,26 +628,26 @@ export const PosOrderScreen: React.FC = () => {
                 }}
                 data-testid="pos-custom-amount-input"
                 placeholder={t('pos.customAmountPlaceholder')}
-                className="w-36 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-mono font-bold text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                className="w-36 px-3 py-1.5 bg-[#2c2c2e] border border-white/10 rounded-[12px] text-xs font-mono font-bold text-white focus:outline-none focus:border-[#ffd60a]"
               />
             </div>
           </div>
         </div>
 
         {/* STEP 3: ACTION BAR / QABUL QILISH */}
-        <div className="pt-3 border-t border-slate-800">
-          <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-emerald-500/40 rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="pt-3 border-t border-white/10">
+          <div className="bg-[#2c2c2e] border border-white/10 rounded-[22px] p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* Draft Summary */}
             <div className="space-y-1.5">
-              <div className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-[#30d158] flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-[#30d158]" />
                 <span>{t('pos.step3')}:</span>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm text-white">
-                <span className="text-slate-400">{t('pos.selectedMaster')}:</span>
+                <span className="text-white/50">{t('pos.selectedMaster')}:</span>
                 <span
                   data-testid="pos-draft-master-name"
-                  className="font-extrabold text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/30"
+                  className="font-bold text-[#30d158] bg-[#30d158]/15 px-2.5 py-1 rounded-[10px] border border-[#30d158]/30"
                 >
                   {activeMaster
                     ? language === 'uz' && activeMaster.nameUz
@@ -609,11 +657,11 @@ export const PosOrderScreen: React.FC = () => {
                     ? 'Массажистка не выбрана'
                     : 'Massajistka tanlanmagan'}
                 </span>
-                <span className="text-slate-600">•</span>
-                <span className="text-slate-400">{t('pos.selectedService')}:</span>
+                <span className="text-white/30">•</span>
+                <span className="text-white/50">{t('pos.selectedService')}:</span>
                 <span
                   data-testid="pos-draft-service-name"
-                  className="font-bold text-white bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-800"
+                  className="font-semibold text-white bg-[#1c1c1e] px-2.5 py-1 rounded-[10px] border border-white/10"
                 >
                   {language === 'uz' ? selectedService.serviceNameUz : selectedService.serviceNameRu}{' '}
                   ({formatDuration(selectedService.durationMinutes, language)})
@@ -624,12 +672,12 @@ export const PosOrderScreen: React.FC = () => {
             {/* Instant Add Order Button */}
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-[10px] text-slate-400 uppercase font-black tracking-wider">
+                <div className="text-[10px] text-white/40 uppercase font-bold tracking-wider">
                   {t('priceList.price')}:
                 </div>
                 <div
                   data-testid="pos-draft-price"
-                  className="font-mono text-xl sm:text-2xl md:text-3xl font-black text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]"
+                  className="font-mono text-xl sm:text-2xl md:text-3xl font-extrabold text-[#30d158]"
                 >
                   {formatCurrencyUZS(
                     selectedService.isCustom
@@ -645,10 +693,10 @@ export const PosOrderScreen: React.FC = () => {
                 disabled={!activeMaster}
                 onClick={handleAddOrder}
                 data-testid="pos-submit-order"
-                className={`inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl font-black text-sm tracking-wide shadow-2xl transition-all select-none cursor-pointer ${
+                className={`inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-[18px] font-extrabold text-sm tracking-wide shadow-2xl transition-all select-none cursor-pointer ${
                   activeMaster
-                    ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 active:scale-95 text-slate-950 font-extrabold shadow-emerald-950/60'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
+                    ? 'bg-[#30d158] hover:bg-[#28b84d] active:scale-95 text-black shadow-lg shadow-[#30d158]/30'
+                    : 'bg-[#2c2c2e] text-white/30 cursor-not-allowed opacity-50'
                 }`}
               >
                 <Check className="w-5 h-5 stroke-[3]" />
@@ -665,19 +713,30 @@ export const PosOrderScreen: React.FC = () => {
         {/* Quick Bar Card */}
         <div
           data-testid="pos-quick-bar-card"
-          className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl space-y-3.5 backdrop-blur-md"
+          className="bg-[#1c1c1e] border border-white/10 rounded-[24px] p-4 sm:p-5 shadow-xl space-y-3.5 backdrop-blur-md"
         >
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-            <h4 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <h4 className="text-xs font-black uppercase tracking-wider text-[#ffd60a] flex items-center gap-2">
               <Coffee className="w-4 h-4" />
               <span>{t('pos.quickBarSales')}</span>
             </h4>
-            <span
-              data-testid="pos-bar-current-total"
-              className="text-xs font-mono font-bold text-amber-300 bg-amber-950/60 px-2.5 py-1 rounded-xl border border-amber-500/20"
-            >
-              {formatCurrencyUZS(currentRecord?.bar?.revenue || 0, language)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                data-testid="pos-bar-current-total"
+                className="text-xs font-mono font-bold text-[#ffd60a] bg-[#ffd60a]/15 px-2.5 py-1 rounded-[12px] border border-[#ffd60a]/30"
+              >
+                {formatCurrencyUZS(currentRecord?.bar?.revenue || 0, language)}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsBarEditorOpen(true)}
+                data-testid="open-bar-editor-btn"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[12px] bg-[#ffd60a] hover:bg-[#ffdf33] text-black text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>{language === 'ru' ? 'Редактировать' : 'Tahrirlash'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Quick preset buttons */}
@@ -693,7 +752,7 @@ export const PosOrderScreen: React.FC = () => {
                 type="button"
                 onClick={() => handleAddBarPreset(item.amount, item.ru, item.uz)}
                 data-testid={`pos-quick-bar-btn-${item.amount}`}
-                className="px-2.5 py-2.5 rounded-2xl bg-slate-950/80 hover:bg-slate-950 border border-slate-800 text-xs font-bold text-amber-300 hover:text-white transition-all shadow-sm cursor-pointer active:scale-95"
+                className="px-2.5 py-2.5 rounded-[14px] bg-[#2c2c2e] hover:bg-[#3a3a3c] border border-white/5 text-xs font-bold text-[#ffd60a] transition-all shadow-sm cursor-pointer active:scale-95"
               >
                 + {language === 'uz' ? item.uz : item.ru}
               </button>
@@ -708,13 +767,13 @@ export const PosOrderScreen: React.FC = () => {
               onChange={handleBarChange}
               placeholder={language === 'ru' ? 'Сумма бара (UZS)' : "Bar summasi (so'm)"}
               data-testid="input-bar-revenue"
-              className="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-2xl text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              className="flex-1 px-3.5 py-2 bg-[#2c2c2e] border border-white/10 rounded-[14px] text-xs text-white focus:outline-none focus:border-[#ffd60a] font-mono"
             />
             <button
               type="button"
               onClick={handleAddBarCustom}
               data-testid="pos-quick-bar-submit-btn"
-              className="px-4 py-2 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-black shadow-md transition-all cursor-pointer active:scale-95"
+              className="px-4 py-2 rounded-[14px] bg-[#ffd60a] hover:bg-[#ffdf33] text-black text-xs font-bold shadow-md transition-all cursor-pointer active:scale-95"
             >
               + {language === 'ru' ? 'Добавить' : "Qo'shish"}
             </button>
@@ -724,16 +783,16 @@ export const PosOrderScreen: React.FC = () => {
         {/* Quick Cleaning / Facility Expense Card */}
         <div
           data-testid="pos-quick-cleaning-card"
-          className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl space-y-3.5 backdrop-blur-md"
+          className="bg-[#1c1c1e] border border-white/10 rounded-[24px] p-4 sm:p-5 shadow-xl space-y-3.5 backdrop-blur-md"
         >
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
             <h4 className="text-xs font-black uppercase tracking-wider text-rose-400 flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               <span>{t('pos.quickCleaning')}</span>
             </h4>
             <span
               data-testid="pos-cleaning-current-total"
-              className="text-xs font-mono font-bold text-rose-300 bg-rose-950/60 px-2.5 py-1 rounded-xl border border-rose-500/20"
+              className="text-xs font-mono font-bold text-rose-300 bg-rose-950/60 px-2.5 py-1 rounded-[12px] border border-rose-500/20"
             >
               {formatCurrencyUZS(currentRecord?.expenses?.cleaning || 0, language)}
             </span>
@@ -747,7 +806,7 @@ export const PosOrderScreen: React.FC = () => {
                 type="button"
                 onClick={() => handleSetCleaning(amt)}
                 data-testid={`pos-quick-cleaning-preset-${amt}`}
-                className="px-2.5 py-2.5 rounded-2xl bg-slate-950/80 hover:bg-slate-950 border border-slate-800 text-xs font-bold text-rose-300 hover:text-white transition-all shadow-sm cursor-pointer active:scale-95"
+                className="px-2.5 py-2.5 rounded-[14px] bg-[#2c2c2e] hover:bg-[#3a3a3c] border border-white/5 text-xs font-bold text-rose-300 hover:text-white transition-all shadow-sm cursor-pointer active:scale-95"
               >
                 {amt / 1000}k UZS
               </button>
@@ -831,7 +890,7 @@ export const PosOrderScreen: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={() => deleteMaster(selectedDate, master.id)}
+                      onClick={() => handleDeleteMaster(master)}
                       data-testid={`delete-master-btn-${master.id}`}
                       title={t('journal.actions.delete')}
                       className="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors cursor-pointer"
@@ -1148,6 +1207,11 @@ export const PosOrderScreen: React.FC = () => {
       {/* Telegram Daily Report Modal */}
       {isTelegramModalOpen && (
         <TelegramReportModal onClose={() => setIsTelegramModalOpen(false)} />
+      )}
+
+      {/* Bar Editor Modal */}
+      {isBarEditorOpen && (
+        <BarEditorModal onClose={() => setIsBarEditorOpen(false)} />
       )}
     </div>
   );

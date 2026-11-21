@@ -132,6 +132,8 @@ export interface StoreContextType {
   updateExpenses: (date: string, expenses: Partial<DailyExpenses>) => void;
   updateBar: (date: string, bar: Partial<BarSales>) => void;
   addBarSale: (date: string, amount: number, name?: string) => void;
+  updateBarSaleItem: (date: string, itemIndex: number, item: { name: string; price: number }) => void;
+  removeBarSaleItem: (date: string, itemIndex: number) => void;
 
   // Day Notes
   updateDayNotes: (date: string, notes: string) => void;
@@ -242,7 +244,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
   const removeStaffMember = useCallback(
     (staffId: string) => {
       setStaff((prev) => {
-        const updated = prev.filter((s) => s.id !== staffId && s.name.toLowerCase() !== staffId.toLowerCase());
+        const lower = staffId.toLowerCase().trim();
+        const updated = prev.filter(
+          (s) =>
+            s.id.toLowerCase() !== lower &&
+            s.name.toLowerCase() !== lower &&
+            (s.nameUz || '').toLowerCase() !== lower &&
+            !lower.endsWith(s.id.toLowerCase()) &&
+            !lower.includes(s.name.toLowerCase())
+        );
         persistStaff(updated);
         return updated;
       });
@@ -557,7 +567,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
         if (idx < 0) return prev;
         const list = [...prev];
         const target = { ...list[idx] };
-        target.masters = target.masters.filter((m) => m.id !== masterId);
+        const lower = masterId.toLowerCase().trim();
+        target.masters = target.masters.filter(
+          (m) =>
+            m.id !== masterId &&
+            m.name.toLowerCase() !== lower &&
+            (m.nameUz || '').toLowerCase() !== lower
+        );
         list[idx] = target;
         return list;
       });
@@ -919,6 +935,52 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
     [updateRecords]
   );
 
+  const updateBarSaleItem = useCallback(
+    (date: string, itemIndex: number, item: { name: string; price: number }) => {
+      updateRecords((prev) => {
+        const { list, index } = ensureRecordExists(prev, date);
+        const target = { ...list[index] };
+        const currentBar = target.bar || { revenue: 0, items: [] };
+        const currentItems = [...(currentBar.items || [])];
+        if (itemIndex >= 0 && itemIndex < currentItems.length) {
+          currentItems[itemIndex] = item;
+        }
+        const newRevenue = currentItems.reduce((sum, it) => sum + (Number(it?.price) || 0), 0);
+        target.bar = {
+          ...currentBar,
+          revenue: newRevenue,
+          items: currentItems,
+        };
+        list[index] = target;
+        return list;
+      });
+    },
+    [updateRecords]
+  );
+
+  const removeBarSaleItem = useCallback(
+    (date: string, itemIndex: number) => {
+      updateRecords((prev) => {
+        const { list, index } = ensureRecordExists(prev, date);
+        const target = { ...list[index] };
+        const currentBar = target.bar || { revenue: 0, items: [] };
+        const currentItems = [...(currentBar.items || [])];
+        if (itemIndex >= 0 && itemIndex < currentItems.length) {
+          currentItems.splice(itemIndex, 1);
+        }
+        const newRevenue = currentItems.reduce((sum, it) => sum + (Number(it?.price) || 0), 0);
+        target.bar = {
+          ...currentBar,
+          revenue: newRevenue,
+          items: currentItems,
+        };
+        list[index] = target;
+        return list;
+      });
+    },
+    [updateRecords]
+  );
+
   const updateDayNotes = useCallback(
     (date: string, notes: string) => {
       updateRecords((prev) => {
@@ -1018,6 +1080,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
       updateExpenses,
       updateBar,
       addBarSale,
+      updateBarSaleItem,
+      removeBarSaleItem,
       updateDayNotes,
       resetToBaseline,
       exportData,
@@ -1059,6 +1123,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
       updateExpenses,
       updateBar,
       addBarSale,
+      updateBarSaleItem,
+      removeBarSaleItem,
       updateDayNotes,
       resetToBaseline,
       exportData,

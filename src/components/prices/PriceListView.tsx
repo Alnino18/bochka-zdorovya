@@ -136,17 +136,17 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
     >
       <div data-testid="price-list-container" className="space-y-6">
       {/* View Header Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-teal-950 via-slate-800 to-slate-900 border border-teal-800/50 rounded-2xl p-5 sm:p-6 shadow-xl">
+      <div className="relative overflow-hidden bg-[#1c1c1e] border border-white/10 rounded-[26px] p-5 sm:p-6 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30 mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 mb-2">
               <Tag className="w-3.5 h-3.5" />
               <span>{t('priceList.servicesCount')}</span>
             </div>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
               {t('priceList.title')}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-white/60 mt-1 max-w-2xl leading-relaxed">
               {t('priceList.subtitle')}
             </p>
           </div>
@@ -156,12 +156,12 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
               type="button"
               onClick={() => setIsPriceEditorOpen(true)}
               data-testid="open-price-editor-btn"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[14px] bg-[#ffd60a] hover:bg-[#ffdf33] text-black text-xs font-extrabold transition-all shadow-md cursor-pointer active:scale-95"
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>{t('priceList.editPriceList') || (language === 'ru' ? 'Редактировать прейскурант' : 'Narxlarni tahrirlash')}</span>
             </button>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-teal-300 border border-slate-700 text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-[#2c2c2e] text-white/80 border border-white/10 text-xs font-bold">
               {BUSINESS_CONTACTS.nameRu} • {language === 'ru' ? 'Справочник цен' : 'Narxlar ma\'lumotnomasi'}
             </span>
           </div>
@@ -169,9 +169,9 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
       </div>
 
       {/* Search and Interactive Filter Bar */}
-      <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm space-y-3">
+      <div className="bg-[#1c1c1e] border border-white/10 rounded-[22px] p-4 shadow-lg backdrop-blur-sm space-y-3">
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-white/40">
             <Search className="w-4 h-4" />
           </div>
           <input
@@ -180,7 +180,7 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('priceList.searchPlaceholder')}
             data-testid="catalog-search-input"
-            className="w-full pl-10 pr-10 py-2.5 bg-slate-900/90 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+            className="w-full pl-10 pr-10 py-2.5 bg-[#2c2c2e] border border-white/10 rounded-[14px] text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#30d158] transition-all"
           />
           {searchQuery && (
             <button
@@ -323,7 +323,7 @@ export const PriceListView: React.FC<PriceListViewProps> = ({
               <div
                 key={category.id}
                 data-testid={`service-card-${category.categoryNumber}`}
-                className="bg-slate-800/90 border border-slate-700/80 hover:border-teal-500/50 rounded-2xl p-5 shadow-lg flex flex-col justify-between transition-all duration-200 group hover:shadow-teal-950/20 hover:shadow-xl"
+                className="bg-[#1c1c1e] border border-white/10 hover:border-white/20 rounded-[22px] p-5 shadow-lg flex flex-col justify-between transition-all duration-200 group"
               >
                 <div data-testid={`service-category-${category.categoryNumber}`}>
                   {/* Card Header with Category Badge */}

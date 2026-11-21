@@ -4,7 +4,7 @@ export const translations: TranslationsRecord = {
   ru: {
     app: {
       title: "Бочка Здоровья",
-      subtitle: "Терминал заказов и кассовый учет",
+      subtitle: "Касса",
       installApp: "Установить приложение",
       installed: "Приложение установлено",
       offline: "Офлайн-режим: данные сохраняются локально",
@@ -107,7 +107,7 @@ export const translations: TranslationsRecord = {
       cat8: "Комбинированный массаж"
     },
     pos: {
-      title: "POS Терминал заказов (Касса)",
+      title: "Касса",
       step1: "1. Выберите массажистку",
       step2: "2. Выберите услугу",
       step3: "3. Подтвердить заказ",
@@ -148,7 +148,7 @@ export const translations: TranslationsRecord = {
   uz: {
     app: {
       title: "Bochka Zdorovya",
-      subtitle: "Buyurtma terminali va kassa hisobi",
+      subtitle: "Kassa",
       installApp: "Ilovani o'rnatish",
       installed: "Ilova o'rnatilgan",
       offline: "Oflayn rejim: ma'lumotlar xotirada saqlanadi",
@@ -251,7 +251,7 @@ export const translations: TranslationsRecord = {
       cat8: "Kombinatsiyalangan massaj"
     },
     pos: {
-      title: "POS Buyurtma terminali (Kassa)",
+      title: "Kassa",
       step1: "1. Massajistkani tanlang",
       step2: "2. Xizmatni tanlang",
       step3: "3. Buyurtmani tasdiqlash",

@@ -117,21 +117,24 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({ onClos
       role="dialog"
       aria-modal="true"
       data-testid="telegram-report-modal"
-      className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     >
-      <div className="bg-slate-900 border border-sky-500/30 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl space-y-5 my-8">
+      <div className="bg-[#1c1c1e] text-white border border-white/10 rounded-[26px] w-full max-w-2xl p-5 sm:p-6 shadow-2xl space-y-5 my-8">
+        {/* iOS Grabber Pill */}
+        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto -mt-1 mb-1" />
+
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-500/30">
+            <div className="w-10 h-10 rounded-[14px] bg-[#0a84ff]/20 text-[#0a84ff] flex items-center justify-center border border-[#0a84ff]/30">
               <Send className="w-5 h-5" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-500/30 mb-0.5">
-                <Sparkles className="w-3 h-3" />
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white/80 border border-white/10 mb-0.5">
+                <Sparkles className="w-3 h-3 text-[#0a84ff]" />
                 <span>Telegram Bot Integration</span>
               </div>
-              <h3 className="text-base sm:text-lg font-black text-white">
+              <h3 className="text-base sm:text-lg font-bold text-white">
                 {language === 'ru' ? 'Ежедневный кассовый отчет' : 'Kunlik kassa hisoboti'}
               </h3>
             </div>
@@ -139,14 +142,14 @@ export const TelegramReportModal: React.FC<TelegramReportModalProps> = ({ onClos
 
           <div className="flex items-center gap-2">
             {/* Tab switchers */}
-            <div className="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+            <div className="flex items-center bg-[#2c2c2e] p-1 rounded-[12px] border border-white/10">
               <button
                 type="button"
                 onClick={() => setActiveTab('preview')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3 py-1 rounded-[8px] text-xs font-bold transition-all ${
                   activeTab === 'preview'
-                    ? 'bg-sky-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-[#0a84ff] text-white shadow-sm'
+                    : 'text-white/60 hover:text-white'
                 }`}
               >
                 {language === 'ru' ? 'Отчет' : 'Hisobot'}

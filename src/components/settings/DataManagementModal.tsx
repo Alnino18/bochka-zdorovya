@@ -56,12 +56,15 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({ onClos
       aria-modal="true"
       aria-labelledby="data-mgmt-title"
       data-testid="data-management-modal"
-      className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4"
     >
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-700">
+      <div className="bg-[#1c1c1e] text-white border border-white/10 rounded-[26px] w-full max-w-lg p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        {/* iOS Grabber Pill */}
+        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto -mt-1 mb-1" />
+
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <h3 id="data-mgmt-title" className="text-base font-bold text-white flex items-center gap-2">
-            <Database className="w-5 h-5 text-teal-400" />
+            <Database className="w-5 h-5 text-[#30d158]" />
             <span>{language === 'ru' ? 'Управление данными и резервное копирование' : "Ma'lumotlarni boshqarish va zaxiralash"}</span>
           </h3>
           <button
@@ -69,9 +72,9 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({ onClos
             onClick={onClose}
             data-testid="close-data-mgmt-btn"
             aria-label={t('journal.actions.cancel')}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700"
+            className="w-8 h-8 rounded-full bg-[#2c2c2e] hover:bg-[#3a3a3c] text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
