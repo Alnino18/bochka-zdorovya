@@ -22,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md flex-shrink-0 border border-teal-400/40 bg-slate-900 flex items-center justify-center">
               <img 
-                src="/icons/icon.svg" 
+                src="./icons/icon.svg" 
                 alt="Бочка Здоровья" 
                 width="40"
                 height="40"

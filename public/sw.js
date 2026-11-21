@@ -2,15 +2,15 @@
 const CACHE_NAME = 'bochka-pwa-v1';
 
 const STATIC_PRECACHE = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/favicon.ico',
-  '/icons/icon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon-maskable-192.png',
-  '/icons/icon-maskable-512.png'
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './favicon.ico',
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png'
 ];
 
 // Install: precache essential shell assets
@@ -62,7 +62,7 @@ self.addEventListener('fetch', (event) => {
         .catch(async () => {
           // Offline fallback: serve cached index.html or root
           const cache = await caches.open(CACHE_NAME);
-          const cachedIndex = await cache.match('/index.html') || await cache.match('/');
+          const cachedIndex = await cache.match('./index.html') || await cache.match('./') || await cache.match('/index.html') || await cache.match('/');
           if (cachedIndex) {
             return cachedIndex;
           }

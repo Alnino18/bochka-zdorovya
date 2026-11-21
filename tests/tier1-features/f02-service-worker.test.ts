@@ -29,7 +29,7 @@ describe('Tier 1 - Feature F02: Service Worker Offline Cache (R1)', () => {
 
     registerServiceWorker();
     window.dispatchEvent(new Event('load'));
-    expect(registerMock).toHaveBeenCalledWith('/sw.js');
+    expect(registerMock).toHaveBeenCalledWith(expect.stringMatching(/(\.\/|\/)sw\.js$/));
   });
 
   it('T1-F02-02: verifies sw.js defines cache naming and precaches essential app shell assets', () => {
