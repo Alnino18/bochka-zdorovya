@@ -5,6 +5,10 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'SF Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   letter-spacing: -0.012em;
+  color-scheme: light;
+}
+
+html.dark {
   color-scheme: dark;
 }
 
@@ -12,10 +16,15 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background-color: #000000;
-  color: #f5f5f7;
+  background-color: #f8fafc;
+  color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark body {
+  background-color: #000000;
+  color: #f5f5f7;
 }
 
 /* Ensure no accidental horizontal scroll on any viewport */
@@ -23,30 +32,57 @@ html, body, #root {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  background-color: #000000;
 }
 
 /* iOS Glass & Blur Utilities */
 .ios-glass {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+}
+
+html.dark .ios-glass {
   background: rgba(28, 28, 30, 0.85);
   backdrop-filter: blur(25px) saturate(180%);
   -webkit-backdrop-filter: blur(25px) saturate(180%);
 }
 
 .ios-glass-header {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+html.dark .ios-glass-header {
   background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(25px) saturate(180%);
   -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* iOS Card / Table cell styles */
 .ios-card {
+  background-color: #ffffff;
+  border-radius: 22px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+html.dark .ios-card {
   background-color: #1c1c1e;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
 }
 
 .ios-card-secondary {
+  background-color: #f1f5f9;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+}
+
+html.dark .ios-card-secondary {
   background-color: #2c2c2e;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -56,9 +92,13 @@ html, body, #root {
 .ios-grabber {
   width: 38px;
   height: 5px;
-  background-color: rgba(255, 255, 255, 0.28);
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 9999px;
   margin: 0 auto 14px;
+}
+
+html.dark .ios-grabber {
+  background-color: rgba(255, 255, 255, 0.28);
 }
 
 /* iOS Custom scrollbar */
@@ -67,12 +107,18 @@ html, body, #root {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c2c2e;
+  background: #cbd5e1;
   border-radius: 4px;
 }
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2c2c2e;
+}
 ::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
   background: #30d158;
 }

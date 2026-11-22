@@ -15,17 +15,17 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
   const bookings = currentRecord?.bookings || [];
 
   return (
-    <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4" data-testid="bookings-section">
-      <div className="flex items-center justify-between pb-2 border-b border-slate-700/60">
+    <div className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4 transition-colors" data-testid="bookings-section">
+      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700/60">
         <div className="flex items-center gap-2">
-          <Bookmark className="w-5 h-5 text-teal-400" />
-          <h4 className="text-sm font-bold text-white">{t('journal.bookingsSection')}</h4>
+          <Bookmark className="w-5 h-5 text-emerald-600 dark:text-teal-400" />
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t('journal.bookingsSection')}</h4>
         </div>
         <button
           type="button"
           onClick={onAddBookingClick}
           data-testid="add-booking-btn"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shadow-sm transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>{t('journal.addBooking')}</span>
@@ -33,7 +33,7 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
       </div>
 
       {bookings.length === 0 ? (
-        <div className="py-6 text-center text-slate-500 text-xs">
+        <div className="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
           {language === 'ru' ? 'Нет записей на этот день' : "Bu kunga yozuvlar yo'q"}
         </div>
       ) : (
@@ -46,8 +46,8 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                 data-testid={`booking-card-${booking.id}`}
                 className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-colors ${
                   booking.completed
-                    ? 'bg-slate-900/40 border-slate-800 opacity-75'
-                    : 'bg-slate-900/80 border-slate-700'
+                    ? 'bg-slate-100 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-75'
+                    : 'bg-slate-50 dark:bg-slate-900/80 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -60,10 +60,10 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                         ? (language === 'ru' ? 'Отметить как невыполненную' : 'Bajarilmagan deb belgilash')
                         : (language === 'ru' ? 'Отметить как выполненную' : 'Bajarilgan deb belgilash')
                     }
-                    className="text-slate-400 hover:text-teal-400 transition-colors"
+                    className="text-slate-400 hover:text-emerald-600 dark:hover:text-teal-400 transition-colors cursor-pointer"
                   >
                     {booking.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-teal-400" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-teal-400" />
                     ) : (
                       <Circle className="w-5 h-5" />
                     )}
@@ -72,18 +72,18 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                   <div>
                     <div className="flex items-center gap-2">
                       <span
-                        className="text-xs font-bold text-teal-300"
+                        className="text-xs font-bold text-emerald-700 dark:text-teal-300"
                         data-testid={`booking-time-${booking.id}`}
                       >
                         {booking.time}
                       </span>
                       {booking.clientName && (
-                        <span className="text-xs font-semibold text-white">
+                        <span className="text-xs font-semibold text-slate-900 dark:text-white">
                           • {booking.clientName}
                         </span>
                       )}
                       {booking.partySize > 1 && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                           {booking.partySize} {language === 'ru' ? 'чел.' : 'kishi'}
                         </span>
                       )}
@@ -94,14 +94,14 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                         href={telUri}
                         data-testid={`booking-call-link-${booking.id}`}
                         aria-label={`${t('priceList.callAction')}: ${booking.phone}`}
-                        className="text-xs text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors"
+                        className="text-xs text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 flex items-center gap-1 transition-colors"
                       >
                         <Phone className="w-3 h-3" />
                         <span data-testid={`booking-phone-${booking.id}`}>{booking.phone}</span>
                       </a>
                       {booking.notes && (
-                        <span className="text-[11px] text-slate-500 italic">
-                          ({booking.notes})
+                        <span className="text-[11px] text-slate-400 truncate max-w-xs">
+                          • {booking.notes}
                         </span>
                       )}
                     </div>
@@ -113,8 +113,7 @@ export const BookingsSection: React.FC<BookingsSectionProps> = ({ onAddBookingCl
                   onClick={() => deleteBooking(selectedDate, booking.id)}
                   data-testid={`booking-delete-${booking.id}`}
                   title={t('journal.actions.delete')}
-                  aria-label={t('journal.actions.delete')}
-                  className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                  className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

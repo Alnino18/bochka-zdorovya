@@ -27,16 +27,16 @@ export const FacilityExpenses: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#1c1c1e] border border-white/10 rounded-[22px] p-5 shadow-lg space-y-4">
-      <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-        <Sparkles className="w-4 h-4 text-[#ffd60a]" />
-        <h4 className="text-sm font-bold text-white">{t('journal.expensesSection')} & {t('journal.barSection')}</h4>
+    <div className="bg-white dark:bg-[#1c1c1e] border border-slate-200/80 dark:border-white/10 rounded-[22px] p-5 shadow-sm dark:shadow-lg space-y-4 transition-colors">
+      <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-white/10">
+        <Sparkles className="w-4 h-4 text-amber-500 dark:text-[#ffd60a]" />
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t('journal.expensesSection')} &amp; {t('journal.barSection')}</h4>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Cleaning Expense */}
         <div>
-          <label htmlFor="input-cleaning" className="block text-xs font-medium text-white/70 mb-1">
+          <label htmlFor="input-cleaning" className="block text-xs font-medium text-slate-600 dark:text-white/70 mb-1">
             {t('journal.cleaning')} (UZS)
           </label>
           <input
@@ -46,13 +46,13 @@ export const FacilityExpenses: React.FC = () => {
             value={cleaning}
             data-testid="input-cleaning-expense"
             onChange={handleCleaningChange}
-            className="w-full bg-[#2c2c2e] border border-white/10 text-sm text-white rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-[#ffd60a]"
+            className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-amber-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#ffd60a]"
           />
         </div>
 
         {/* Other Expense */}
         <div>
-          <label htmlFor="input-other" className="block text-xs font-medium text-white/70 mb-1">
+          <label htmlFor="input-other" className="block text-xs font-medium text-slate-600 dark:text-white/70 mb-1">
             {t('journal.otherExpenses')} (UZS)
           </label>
           <input
@@ -62,14 +62,14 @@ export const FacilityExpenses: React.FC = () => {
             value={other}
             data-testid="input-other-expense"
             onChange={handleOtherChange}
-            className="w-full bg-[#2c2c2e] border border-white/10 text-sm text-white rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-[#ffd60a]"
+            className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-amber-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#ffd60a]"
           />
         </div>
 
         {/* Bar Sales */}
         <div>
-          <label htmlFor="input-bar" className="block text-xs font-medium text-white/70 mb-1 flex items-center gap-1">
-            <Coffee className="w-3.5 h-3.5 text-[#ffd60a]" />
+          <label htmlFor="input-bar" className="block text-xs font-medium text-slate-600 dark:text-white/70 mb-1 flex items-center gap-1">
+            <Coffee className="w-3.5 h-3.5 text-amber-500 dark:text-[#ffd60a]" />
             <span>{t('journal.barRevenue')} (UZS)</span>
           </label>
           <input
@@ -79,7 +79,7 @@ export const FacilityExpenses: React.FC = () => {
             value={barRevenue}
             data-testid="input-bar-revenue"
             onChange={handleBarRevenueChange}
-            className="w-full bg-[#2c2c2e] border border-white/10 text-sm text-white rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-[#ffd60a]"
+            className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-amber-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#ffd60a]"
           />
         </div>
       </div>
