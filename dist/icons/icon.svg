@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#022c22"/>
+      <stop offset="50%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+
+    <!-- Cedar Barrel Body Gradient -->
+    <linearGradient id="barrelWood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#78350f"/>
+      <stop offset="25%" stop-color="#b45309"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="75%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+
+    <!-- Gold Metallic Bands -->
+    <linearGradient id="goldBand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="30%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#fef08a"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Steam Gradient -->
+    <linearGradient id="steamGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#a7f3d0" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#ccfbf1" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1"/>
+    </linearGradient>
+
+    <!-- Leaf Gradient -->
+    <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="barrelShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#011b15" flood-opacity="0.6"/>
+    </filter>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Modern Rounded Squircle Container -->
+  <rect width="512" height="512" rx="116" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Ambient Glow Rings -->
+  <circle cx="256" cy="270" r="195" fill="none" stroke="rgba(45, 212, 191, 0.12)" stroke-width="2"/>
+  <circle cx="256" cy="270" r="170" fill="none" stroke="rgba(251, 191, 36, 0.14)" stroke-width="1.5" stroke-dasharray="8 6"/>
+
+  <!-- Central Phyto-Barrel Group -->
+  <g filter="url(#barrelShadow)" transform="translate(0, 10)">
+    
+    <!-- Barrel Main Silhouette -->
+    <!-- Curved cedar barrel profile -->
+    <path d="M 175 160 C 138 215 138 315 175 370 C 215 382 297 382 337 370 C 374 315 374 215 337 160 C 297 148 215 148 175 160 Z" 
+          fill="url(#barrelWood)" 
+          stroke="#451a03" 
+          stroke-width="3"/>
+
+    <!-- Wood Staves / Planks (Subtle vertical curve lines) -->
+    <path d="M 215 152 C 190 215 190 315 215 378" stroke="rgba(69, 26, 3, 0.35)" stroke-width="3" fill="none"/>
+    <path d="M 256 150 C 256 215 256 315 256 380" stroke="rgba(69, 26, 3, 0.35)" stroke-width="3.5" fill="none"/>
+    <path d="M 297 152 C 322 215 322 315 297 378" stroke="rgba(69, 26, 3, 0.35)" stroke-width="3" fill="none"/>
+
+    <!-- Top Metallic Gold Hoop -->
+    <path d="M 160 200 C 205 210 307 210 352 200 L 354 216 C 307 226 205 226 158 216 Z" 
+          fill="url(#goldBand)" 
+          stroke="#78350f" 
+          stroke-width="1.5"/>
+
+    <!-- Bottom Metallic Gold Hoop -->
+    <path d="M 158 320 C 205 330 307 330 354 320 L 352 336 C 307 346 205 346 160 336 Z" 
+          fill="url(#goldBand)" 
+          stroke="#78350f" 
+          stroke-width="1.5"/>
+
+    <!-- Barrel Rim Highlight -->
+    <ellipse cx="256" cy="155" rx="81" ry="9" fill="#92400e" stroke="url(#goldBand)" stroke-width="2"/>
+  </g>
+
+  <!-- Herbal Steam Waves Rising from Barrel -->
+  <g filter="url(#softGlow)">
+    <!-- Center steam swirl -->
+    <path d="M 256 142 C 248 115 268 95 256 70 C 244 48 258 35 252 22" 
+          stroke="url(#steamGrad)" 
+          stroke-width="6.5" 
+          stroke-linecap="round" 
+          fill="none"/>
+
+    <!-- Left steam swirl -->
+    <path d="M 226 145 C 208 120 220 100 210 78 C 202 60 212 45 206 32" 
+          stroke="url(#steamGrad)" 
+          stroke-width="5" 
+          stroke-linecap="round" 
+          fill="none" 
+          opacity="0.85"/>
+
+    <!-- Right steam swirl -->
+    <path d="M 286 145 C 304 120 292 100 302 78 C 310 60 300 45 306 32" 
+          stroke="url(#steamGrad)" 
+          stroke-width="5" 
+          stroke-linecap="round" 
+          fill="none" 
+          opacity="0.85"/>
+  </g>
+
+  <!-- Modern Organic Herbal Leaf Motif (Top Accent) -->
+  <g transform="translate(256, 142) rotate(-18) scale(0.9)">
+    <path d="M 0 0 C 18 -32 55 -38 68 -15 C 68 -15 62 18 25 15 C 6 13 0 0 0 0 Z" 
+          fill="url(#leafGrad)" 
+          filter="url(#softGlow)"/>
+    <path d="M 0 0 C 20 -10 42 -15 68 -15" 
+          stroke="#065f46" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          fill="none"/>
+  </g>
+
+  <!-- Sleek Modern Brand Title -->
+  <text x="256" y="432" 
+        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+        font-size="28" 
+        font-weight="800" 
+        fill="#ffffff" 
+        text-anchor="middle" 
+        letter-spacing="4">БОЧКА ЗДОРОВЬЯ</text>
+
+  <!-- Subtitle Tagline -->
+  <text x="256" y="458" 
+        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+        font-size="13" 
+        font-weight="600" 
+        fill="#5eead4" 
+        text-anchor="middle" 
+        letter-spacing="5">WELLNESS &amp; SPA</text>
+</svg>
