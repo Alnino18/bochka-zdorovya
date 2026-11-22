@@ -9,7 +9,7 @@ import { EditOrderModal } from './EditOrderModal';
 import { TelegramReportModal } from './TelegramReportModal';
 import { PriceEditorModal } from '../prices/PriceEditorModal';
 import { BarEditorModal } from './BarEditorModal';
-import { ServiceOrderItem, MasterEntry } from '../../types/accounting';
+import { ServiceOrderItem, MasterEntry, OrderBarItem } from '../../types/accounting';
 import {
   User,
   Users,
@@ -35,6 +35,7 @@ import {
   Copy,
   Edit3,
   Settings,
+  X,
 } from 'lucide-react';
 
 export const PosOrderScreen: React.FC = () => {
@@ -44,6 +45,7 @@ export const PosOrderScreen: React.FC = () => {
     currentRecord,
     summary,
     addOrder,
+    addBarToOrder,
     removeOrder,
     deleteMaster,
     removeStaffMember,
@@ -101,6 +103,16 @@ export const PosOrderScreen: React.FC = () => {
   }));
 
   const [customPriceInput, setCustomPriceInput] = useState<string>('350000');
+  const [draftBarItems, setDraftBarItems] = useState<OrderBarItem[]>([]);
+  const [customDraftBarName, setCustomDraftBarName] = useState<string>('');
+  const [customDraftBarPrice, setCustomDraftBarPrice] = useState<string>('15000');
+  const [showCustomBarInput, setShowCustomBarInput] = useState<boolean>(false);
+  const [quickBarModalOrder, setQuickBarModalOrder] = useState<{
+    order: ServiceOrderItem;
+    master: MasterEntry;
+    clientNum: number;
+  } | null>(null);
+
   const [isAddMasterModalOpen, setIsAddMasterModalOpen] = useState(false);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [isPriceEditorModalOpen, setIsPriceEditorModalOpen] = useState(false);
@@ -150,6 +162,12 @@ export const PosOrderScreen: React.FC = () => {
     }
   };
 
+  const draftMassagePrice = selectedService.isCustom
+    ? Number(customPriceInput) || 350000
+    : selectedService.price;
+  const draftBarTotal = draftBarItems.reduce((acc, it) => acc + (it.price || 0), 0);
+  const draftClientTotalBill = draftMassagePrice + draftBarTotal;
+
   // Step 3: Handle instant order submission
   const handleAddOrder = () => {
     if (!activeMaster) {
@@ -168,15 +186,19 @@ export const PosOrderScreen: React.FC = () => {
       serviceNameUz: selectedService.serviceNameUz,
       durationMinutes: selectedService.durationMinutes,
       price,
+      barItems: draftBarItems.length > 0 ? draftBarItems : undefined,
     });
 
     const masterDisplayName = language === 'uz' && activeMaster.nameUz ? activeMaster.nameUz : activeMaster.name;
+    const totalAmount = price + draftBarTotal;
+    const barNote = draftBarTotal > 0 ? ` + ${formatCurrencyUZS(draftBarTotal, language)}` : '';
     const msg =
       language === 'ru'
-        ? `Заказ оформлен: ${masterDisplayName} — ${serviceName} (${formatCurrencyUZS(price, 'ru')})`
-        : `Buyurtma qabul qilindi: ${masterDisplayName} — ${serviceName} (${formatCurrencyUZS(price, 'uz')})`;
+        ? `Заказ оформлен: ${masterDisplayName} — ${serviceName}${barNote} (Итого: ${formatCurrencyUZS(totalAmount, 'ru')})`
+        : `Buyurtma qabul qilindi: ${masterDisplayName} — ${serviceName}${barNote} (Jami: ${formatCurrencyUZS(totalAmount, 'uz')})`;
 
     setSuccessBanner(msg);
+    setDraftBarItems([]);
     setTimeout(() => {
       setSuccessBanner(null);
     }, 4000);
@@ -632,6 +654,150 @@ export const PosOrderScreen: React.FC = () => {
               />
             </div>
           </div>
+
+          {/* Quick Bar Items for Draft Order */}
+          <div
+            data-testid="pos-draft-bar-section"
+            className="bg-amber-50/70 dark:bg-[#2c2c2e]/70 border border-amber-200/80 dark:border-white/10 rounded-[20px] p-3.5 sm:p-4 space-y-3 shadow-sm transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Coffee className="w-4 h-4 text-amber-600 dark:text-[#ffd60a]" />
+                <span className="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-[#ffd60a]">
+                  {language === 'ru' ? 'Чай / Напитки к заказу' : "Buyurtmaga choy / ichimliklar"}
+                </span>
+              </div>
+              {draftBarTotal > 0 && (
+                <div className="flex items-center gap-2">
+                  <span
+                    data-testid="pos-draft-bar-subtotal"
+                    className="text-xs font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-[10px] border border-amber-300 dark:bg-[#ffd60a]/20 dark:text-[#ffd60a] dark:border-[#ffd60a]/40"
+                  >
+                    +{formatCurrencyUZS(draftBarTotal, language)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setDraftBarItems([])}
+                    className="text-[11px] font-bold text-rose-600 hover:text-rose-700 dark:text-rose-400 cursor-pointer"
+                  >
+                    {language === 'ru' ? 'Сбросить' : 'Tozalash'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 1-Tap Quick Bar Buttons */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: 'tea', nameRu: 'Чай', nameUz: 'Choy', icon: '☕️', price: 15000 },
+                { key: 'water', nameRu: 'Вода', nameUz: 'Suv', icon: '💧', price: 5000 },
+                { key: 'coffee', nameRu: 'Кофе', nameUz: 'Kofe', icon: '☕️', price: 20000 },
+                { key: 'lemonade', nameRu: 'Лимонад', nameUz: 'Limonad', icon: '🥤', price: 25000 },
+                { key: 'snack', nameRu: 'Снек / Шоколад', nameUz: 'Snek / Shokolad', icon: '🍫', price: 15000 },
+              ].map((preset) => (
+                <button
+                  key={preset.key}
+                  type="button"
+                  onClick={() =>
+                    setDraftBarItems((prev) => [
+                      ...prev,
+                      {
+                        id: `bi-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                        name: preset.nameRu,
+                        nameUz: preset.nameUz,
+                        price: preset.price,
+                      },
+                    ])
+                  }
+                  data-testid={`pos-draft-bar-btn-${preset.key}`}
+                  className="px-3 py-2 rounded-[14px] bg-white hover:bg-amber-50 active:scale-95 border border-amber-200 text-xs font-bold text-slate-800 hover:text-amber-900 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer dark:bg-[#1c1c1e] dark:hover:bg-[#3a3a3c] dark:border-white/10 dark:text-white"
+                >
+                  <span>{preset.icon}</span>
+                  <span>{language === 'uz' ? preset.nameUz : preset.nameRu}</span>
+                  <span className="font-mono text-amber-700 dark:text-[#ffd60a] font-bold">
+                    +{preset.price / 1000}k
+                  </span>
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setShowCustomBarInput((prev) => !prev)}
+                data-testid="pos-draft-custom-bar-toggle"
+                className="px-3 py-2 rounded-[14px] bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-slate-700 transition-all shadow-xs flex items-center gap-1 cursor-pointer active:scale-95 dark:bg-[#1c1c1e] dark:border-white/10 dark:text-white/80"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{language === 'ru' ? '+ Другой бар' : "+ Boshqa bar"}</span>
+              </button>
+            </div>
+
+            {/* Custom Bar Input Expander */}
+            {showCustomBarInput && (
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-amber-200/60 dark:border-white/10">
+                <input
+                  type="text"
+                  placeholder={language === 'ru' ? 'Название (напр. Свежевыжатый сок)' : "Nomi (masalan: Yangi sharbat)"}
+                  value={customDraftBarName}
+                  onChange={(e) => setCustomDraftBarName(e.target.value)}
+                  className="flex-1 min-w-[140px] px-3 py-1.5 bg-white border border-slate-300 rounded-[12px] text-xs text-slate-900 dark:bg-[#1c1c1e] dark:border-white/10 dark:text-white"
+                />
+                <input
+                  type="number"
+                  placeholder="UZS"
+                  value={customDraftBarPrice}
+                  onChange={(e) => setCustomDraftBarPrice(e.target.value)}
+                  className="w-24 px-3 py-1.5 bg-white border border-slate-300 rounded-[12px] text-xs font-mono font-bold text-slate-900 dark:bg-[#1c1c1e] dark:border-white/10 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const price = Number(customDraftBarPrice) || 0;
+                    const name = customDraftBarName.trim() || (language === 'ru' ? 'Напиток' : 'Ichimlik');
+                    if (price > 0) {
+                      setDraftBarItems((prev) => [
+                        ...prev,
+                        {
+                          id: `bi-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                          name,
+                          nameUz: name,
+                          price,
+                        },
+                      ]);
+                      setCustomDraftBarName('');
+                      setShowCustomBarInput(false);
+                    }
+                  }}
+                  className="px-3.5 py-1.5 rounded-[12px] bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold shadow transition-all cursor-pointer dark:bg-[#ffd60a] dark:text-black"
+                >
+                  + {language === 'ru' ? 'Добавить' : "Qo'shish"}
+                </button>
+              </div>
+            )}
+
+            {/* Selected Bar Items Pills */}
+            {draftBarItems.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {draftBarItems.map((item) => (
+                  <span
+                    key={item.id}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[12px] bg-white dark:bg-[#1c1c1e] border border-amber-200 dark:border-white/10 text-xs font-semibold text-slate-800 dark:text-white/90 shadow-xs"
+                  >
+                    <span>☕️ {language === 'uz' && item.nameUz ? item.nameUz : item.name}</span>
+                    <span className="font-mono text-amber-700 dark:text-[#ffd60a] font-bold">
+                      +{formatCurrencyUZS(item.price, language)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setDraftBarItems((prev) => prev.filter((it) => it.id !== item.id))}
+                      className="text-slate-400 hover:text-rose-500 cursor-pointer ml-0.5 text-sm font-bold leading-none"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* STEP 3: ACTION BAR / QABUL QILISH */}
@@ -666,26 +832,40 @@ export const PosOrderScreen: React.FC = () => {
                   {language === 'uz' ? selectedService.serviceNameUz : selectedService.serviceNameRu}{' '}
                   ({formatDuration(selectedService.durationMinutes, language)})
                 </span>
+                {draftBarTotal > 0 && (
+                  <>
+                    <span className="text-slate-300 dark:text-white/30">•</span>
+                    <span className="text-slate-500 dark:text-white/50">{t('pos.barItemsTitle')}:</span>
+                    <span
+                      data-testid="pos-draft-bar-badge"
+                      className="font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded-[10px] border border-amber-300 dark:text-[#ffd60a] dark:bg-[#ffd60a]/15 dark:border-[#ffd60a]/30"
+                    >
+                      +{formatCurrencyUZS(draftBarTotal, language)} ({draftBarItems.length})
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Instant Add Order Button */}
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-[10px] text-slate-500 dark:text-white/40 uppercase font-bold tracking-wider">
-                  {t('priceList.price')}:
+            {/* Instant Add Order Button & Prominent Total Bill */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between md:justify-end gap-3 sm:gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-slate-200/80 dark:border-white/10">
+              <div className="text-left sm:text-right">
+                <div className="text-[10px] text-slate-500 dark:text-white/40 uppercase font-extrabold tracking-wider whitespace-nowrap">
+                  {draftBarTotal > 0
+                    ? (language === 'ru' ? 'Итого к оплате (Массаж + Бар):' : "Jami to'lov (Massaj + Bar):")
+                    : `${t('priceList.price')}:`}
                 </div>
                 <div
                   data-testid="pos-draft-price"
-                  className="font-mono text-xl sm:text-2xl md:text-3xl font-extrabold text-emerald-600 dark:text-[#30d158]"
+                  className="font-mono text-2xl sm:text-3xl font-black text-emerald-600 dark:text-[#30d158] whitespace-nowrap"
                 >
-                  {formatCurrencyUZS(
-                    selectedService.isCustom
-                      ? Number(customPriceInput) || 350000
-                      : selectedService.price,
-                    language
-                  )}
+                  {formatCurrencyUZS(draftClientTotalBill, language)}
                 </div>
+                {draftBarTotal > 0 && (
+                  <div className="text-[10px] font-mono text-slate-500 dark:text-white/50 whitespace-nowrap">
+                    {formatCurrencyUZS(draftMassagePrice, language)} + {formatCurrencyUZS(draftBarTotal, language)}
+                  </div>
+                )}
               </div>
 
               <button
@@ -693,15 +873,15 @@ export const PosOrderScreen: React.FC = () => {
                 disabled={!activeMaster}
                 onClick={handleAddOrder}
                 data-testid="pos-submit-order"
-                className={`inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-[18px] font-extrabold text-sm tracking-wide shadow-lg transition-all select-none cursor-pointer ${
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:py-4 rounded-[18px] font-extrabold text-sm tracking-wide shadow-lg transition-all select-none cursor-pointer whitespace-nowrap ${
                   activeMaster
                     ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-emerald-600/30 dark:bg-[#30d158] dark:hover:bg-[#28b84d] dark:text-black dark:shadow-[#30d158]/30'
                     : 'bg-slate-200 text-slate-400 dark:bg-[#2c2c2e] dark:text-white/30 cursor-not-allowed opacity-50'
                 }`}
               >
-                <Check className="w-5 h-5 stroke-[3]" />
+                <Check className="w-5 h-5 stroke-[3] flex-shrink-0" />
                 <span>{t('pos.addOrder')}</span>
-                <ChevronRight className="w-4 h-4 ml-1" />
+                <ChevronRight className="w-4 h-4 ml-1 flex-shrink-0" />
               </button>
             </div>
           </div>
@@ -978,61 +1158,142 @@ export const PosOrderScreen: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Recent Orders List with Edit and Undo Options */}
+                  {/* Recent Orders List with Client Bill, Bar Items & 1-Tap Add Bar */}
                   {master.orders && master.orders.length > 0 && (
-                    <div className="pt-1">
-                      <details className="text-xs group">
-                        <summary className="text-[11px] text-slate-500 dark:text-white/60 hover:text-slate-800 dark:hover:text-white cursor-pointer select-none">
-                          {language === 'ru' ? 'История заказов смены (' : 'Smena buyurtmalari ('}
-                          {master.orders.length})
+                    <div className="pt-2 border-t border-slate-200 dark:border-white/10">
+                      <details className="text-xs group" open>
+                        <summary className="text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none flex items-center justify-between pb-1">
+                          <span>
+                            {language === 'ru' ? 'Заказы клиентов (' : 'Mijozlar hisobi ('}
+                            {master.orders.length})
+                          </span>
+                          <span className="text-[10px] text-emerald-600 dark:text-[#30d158] font-mono font-bold lowercase">
+                            ▼ {language === 'ru' ? 'к оплате' : "to'lov"}
+                          </span>
                         </summary>
-                        <div className="mt-2 space-y-1 max-h-40 overflow-y-auto pr-1">
-                          {master.orders.map((ord) => (
-                            <div
-                              key={ord.id}
-                              className="flex items-center justify-between bg-slate-100 dark:bg-[#2c2c2e] px-2.5 py-2 rounded-xl border border-slate-200 dark:border-white/5 text-[11px] gap-2"
-                            >
-                              <div className="truncate flex-1">
-                                {ord.timestamp && (
-                                  <span className="text-slate-400 dark:text-white/40 mr-1 font-mono text-[10px]">
-                                    {ord.timestamp}
+
+                        <div className="mt-2 space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                          {master.orders.map((ord, ordIdx) => {
+                            const orderBar = ord.barItems || [];
+                            const orderBarSum = orderBar.reduce((acc, it) => acc + (it.price || 0), 0);
+                            const clientTotalBill = (ord.price || 0) + orderBarSum;
+                            const clientNumber = ordIdx + 1;
+
+                            return (
+                              <div
+                                key={ord.id}
+                                data-testid={`client-order-card-${ord.id}`}
+                                className="bg-slate-100 dark:bg-[#2c2c2e] p-3 rounded-[16px] border border-slate-200 dark:border-white/10 space-y-2 shadow-xs transition-colors"
+                              >
+                                {/* Header: Client Number + Timestamp + Actions */}
+                                <div className="flex items-center justify-between gap-1.5">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <span
+                                      data-testid={`order-client-num-${ord.id}`}
+                                      className="px-2 py-0.5 rounded-[8px] bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-[#30d158]/20 dark:text-[#30d158] dark:border-[#30d158]/30 font-black text-[11px] whitespace-nowrap"
+                                    >
+                                      {language === 'ru' ? `Клиент №${clientNumber}` : `Mijoz №${clientNumber}`}
+                                    </span>
+                                    {ord.timestamp && (
+                                      <span className="text-slate-400 dark:text-white/40 font-mono text-[10px] whitespace-nowrap">
+                                        {ord.timestamp}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="flex items-center gap-1 flex-shrink-0">
+                                    {/* 1-Tap Quick Bar Add Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setQuickBarModalOrder({ order: ord, master, clientNum: clientNumber })
+                                      }
+                                      data-testid={`add-bar-to-order-btn-${ord.id}`}
+                                      title={language === 'ru' ? 'Добавить бар к этому клиенту' : "Mijozga bar qo'shish"}
+                                      className="inline-flex items-center gap-1 px-2 py-1 rounded-[10px] bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 dark:bg-[#ffd60a]/20 dark:hover:bg-[#ffd60a]/30 dark:text-[#ffd60a] dark:border-[#ffd60a]/40 text-[10px] font-extrabold cursor-pointer transition-all active:scale-95"
+                                    >
+                                      <Coffee className="w-3 h-3" />
+                                      <span>{language === 'ru' ? '+ Бар' : "+ Bar"}</span>
+                                    </button>
+
+                                    {/* Edit Order Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingOrder({ order: ord, master })}
+                                      data-testid={`edit-order-btn-${ord.id}`}
+                                      title={language === 'ru' ? 'Редактировать заказ' : 'Buyurtmani tahrirlash'}
+                                      className="text-slate-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-slate-200 dark:text-white/50 dark:hover:text-[#30d158] dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5" />
+                                    </button>
+
+                                    {/* Delete / Undo Order Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => removeOrder(selectedDate, master.id, ord.id)}
+                                      data-testid={`undo-order-btn-${ord.id}`}
+                                      title={t('pos.undoOrder')}
+                                      className="text-slate-400 hover:text-rose-500 p-1 rounded-lg hover:bg-slate-200 dark:text-white/50 dark:hover:text-rose-400 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Service Details */}
+                                <div className="flex items-start justify-between text-xs gap-2 pt-0.5">
+                                  <span className="font-semibold text-slate-800 dark:text-white/90 leading-tight">
+                                    {language === 'uz' && ord.serviceNameUz ? ord.serviceNameUz : ord.serviceName}
+                                    {ord.durationMinutes > 0 && ` (${formatDuration(ord.durationMinutes, language)})`}
                                   </span>
-                                )}
-                                <span className="text-slate-800 dark:text-white/90 font-medium">
-                                  {language === 'uz' && ord.serviceNameUz
-                                    ? ord.serviceNameUz
-                                    : ord.serviceName}
-                                </span>
-                                {ord.barItems && ord.barItems.length > 0 && (
-                                  <span className="ml-1 text-[10px] text-amber-800 bg-amber-100 px-1 rounded border border-amber-300 dark:text-amber-300 dark:bg-amber-950/80 dark:border-amber-500/20">
-                                    +{ord.barItems.length}
+                                  <span className="font-mono text-slate-600 dark:text-white/70 font-semibold whitespace-nowrap text-[11px]">
+                                    {formatCurrencyUZS(ord.price, language)}
                                   </span>
+                                </div>
+
+                                {/* Attached Bar Items (if any) */}
+                                {orderBar.length > 0 && (
+                                  <div className="bg-amber-50 dark:bg-amber-950/40 p-2 rounded-[12px] border border-amber-200/80 dark:border-amber-500/20 space-y-1 text-[11px]">
+                                    <div className="text-[10px] font-extrabold uppercase text-amber-800 dark:text-[#ffd60a] flex items-center justify-between">
+                                      <span className="flex items-center gap-1">
+                                        <Coffee className="w-3 h-3" />
+                                        <span>{t('pos.barItemsTitle')}</span>
+                                      </span>
+                                      <span className="font-mono font-bold">
+                                        +{formatCurrencyUZS(orderBarSum, language)}
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {orderBar.map((b) => (
+                                        <span
+                                          key={b.id}
+                                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[8px] bg-white dark:bg-[#1c1c1e] text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-white/10 text-[10px]"
+                                        >
+                                          <span>☕️ {language === 'uz' && b.nameUz ? b.nameUz : b.name}</span>
+                                          <span className="font-mono font-bold">
+                                            +{formatCurrencyUZS(b.price, language)}
+                                          </span>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
                                 )}
+
+                                {/* Bottom Total: Prominent Client Bill */}
+                                <div className="pt-1.5 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+                                  <span className="text-[10px] uppercase font-black text-slate-600 dark:text-white/70">
+                                    {language === 'ru' ? 'Итого к оплате:' : "Jami to'lov:"}
+                                  </span>
+                                  <span
+                                    data-testid={`order-total-bill-${ord.id}`}
+                                    className="font-mono text-xs sm:text-sm font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-[8px] dark:bg-[#30d158]/15 dark:text-[#30d158] dark:border-[#30d158]/30 whitespace-nowrap"
+                                  >
+                                    {formatCurrencyUZS(clientTotalBill, language)}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1.5 flex-shrink-0">
-                                <span className="font-mono font-bold text-emerald-600 dark:text-[#30d158]">
-                                  {formatCurrencyUZS(ord.price, language)}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => setEditingOrder({ order: ord, master })}
-                                  data-testid={`edit-order-btn-${ord.id}`}
-                                  title={language === 'ru' ? 'Редактировать заказ' : 'Buyurtmani tahrirlash'}
-                                  className="text-slate-400 hover:text-emerald-600 p-1 rounded hover:bg-slate-200 dark:hover:text-[#30d158] dark:hover:bg-white/10 transition-colors cursor-pointer"
-                                >
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => removeOrder(selectedDate, master.id, ord.id)}
-                                  title={t('pos.undoOrder')}
-                                  className="text-slate-400 hover:text-rose-500 p-1 rounded hover:bg-slate-200 dark:text-white/50 dark:hover:text-rose-400 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </details>
                     </div>
@@ -1212,6 +1473,148 @@ export const PosOrderScreen: React.FC = () => {
       {/* Bar Editor Modal */}
       {isBarEditorOpen && (
         <BarEditorModal onClose={() => setIsBarEditorOpen(false)} />
+      )}
+
+      {/* Quick Add Bar to Existing Order Modal */}
+      {quickBarModalOrder && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          data-testid="quick-add-bar-order-modal"
+          className="fixed inset-0 z-50 bg-slate-950/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+        >
+          <div className="bg-white dark:bg-[#1c1c1e] text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-[26px] w-full max-w-md p-5 sm:p-6 shadow-2xl space-y-4 my-8 transition-colors">
+            {/* Grabber */}
+            <div className="w-10 h-1 bg-slate-300 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-1" />
+
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-[14px] bg-amber-50 text-amber-600 dark:bg-[#ffd60a]/20 dark:text-[#ffd60a] flex items-center justify-center border border-amber-200 dark:border-[#ffd60a]/30">
+                  <Coffee className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    {language === 'ru' ? 'Добавить бар к заказу' : "Mijoz hisobiga bar qo'shish"}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-white/50">
+                    {language === 'ru' ? 'Клиент' : 'Mijoz'} №{quickBarModalOrder.clientNum} •{' '}
+                    {language === 'uz' && quickBarModalOrder.master.nameUz
+                      ? quickBarModalOrder.master.nameUz
+                      : quickBarModalOrder.master.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickBarModalOrder(null)}
+                data-testid="close-quick-bar-order-modal"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#2c2c2e] dark:hover:bg-[#3a3a3c] dark:text-white/70 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Quick 1-Tap Presets */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-white/60">
+                {language === 'ru' ? 'Выберите напиток (1 тап):' : "Ichimlikni tanlang (1 bosish):"}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { key: 'tea', nameRu: 'Чай', nameUz: 'Choy', icon: '☕️', price: 15000 },
+                  { key: 'water', nameRu: 'Вода', nameUz: 'Suv', icon: '💧', price: 5000 },
+                  { key: 'coffee', nameRu: 'Кофе', nameUz: 'Kofe', icon: '☕️', price: 20000 },
+                  { key: 'lemonade', nameRu: 'Лимонад', nameUz: 'Limonad', icon: '🥤', price: 25000 },
+                  { key: 'snack', nameRu: 'Снек / Шоколад', nameUz: 'Snek / Shokolad', icon: '🍫', price: 15000 },
+                  { key: 'greentea', nameRu: 'Зеленый чай', nameUz: "Ko'k choy", icon: '🍵', price: 20000 },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => {
+                      addBarToOrder(
+                        selectedDate,
+                        quickBarModalOrder.master.id,
+                        quickBarModalOrder.order.id,
+                        { name: item.nameRu, nameUz: item.nameUz, price: item.price }
+                      );
+                      const itemName = language === 'uz' ? item.nameUz : item.nameRu;
+                      setSuccessBanner(
+                        language === 'ru'
+                          ? `Клиенту №${quickBarModalOrder.clientNum} добавлено: ${itemName} (+${formatCurrencyUZS(item.price, 'ru')})`
+                          : `Mijoz №${quickBarModalOrder.clientNum}ga qo'shildi: ${itemName} (+${formatCurrencyUZS(item.price, 'uz')})`
+                      );
+                      setTimeout(() => setSuccessBanner(null), 3500);
+                      setQuickBarModalOrder(null);
+                    }}
+                    data-testid={`quick-bar-select-${item.key}`}
+                    className="p-3 rounded-[16px] bg-slate-50 hover:bg-amber-50 active:scale-95 border border-slate-200 hover:border-amber-300 text-left transition-all cursor-pointer dark:bg-[#2c2c2e] dark:hover:bg-[#3a3a3c] dark:border-white/5"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{item.icon}</span>
+                      <span className="font-bold text-xs text-slate-800 dark:text-white">
+                        {language === 'uz' ? item.nameUz : item.nameRu}
+                      </span>
+                    </div>
+                    <div className="font-mono font-bold text-amber-700 dark:text-[#ffd60a] text-xs mt-1">
+                      +{formatCurrencyUZS(item.price, language)}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Bar Item Input */}
+            <div className="pt-2 border-t border-slate-200 dark:border-white/10 space-y-2">
+              <label className="text-xs font-bold text-slate-600 dark:text-white/70">
+                {language === 'ru' ? 'Или другое наименование и сумма:' : "Yoki boshqa mahsulot va narx:"}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder={language === 'ru' ? 'Название напитка' : "Ichimlik nomi"}
+                  id="custom-order-bar-name"
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-300 rounded-[14px] text-xs text-slate-900 focus:outline-none focus:border-amber-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white"
+                />
+                <input
+                  type="number"
+                  placeholder="UZS"
+                  defaultValue="20000"
+                  id="custom-order-bar-price"
+                  className="w-24 px-3 py-2 bg-slate-50 border border-slate-300 rounded-[14px] text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-amber-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nameEl = document.getElementById('custom-order-bar-name') as HTMLInputElement;
+                    const priceEl = document.getElementById('custom-order-bar-price') as HTMLInputElement;
+                    const name = nameEl?.value?.trim() || (language === 'ru' ? 'Напиток' : 'Ichimlik');
+                    const price = Number(priceEl?.value) || 0;
+                    if (price > 0) {
+                      addBarToOrder(
+                        selectedDate,
+                        quickBarModalOrder.master.id,
+                        quickBarModalOrder.order.id,
+                        { name, nameUz: name, price }
+                      );
+                      setSuccessBanner(
+                        language === 'ru'
+                          ? `Клиенту №${quickBarModalOrder.clientNum} добавлено: ${name} (+${formatCurrencyUZS(price, 'ru')})`
+                          : `Mijoz №${quickBarModalOrder.clientNum}ga qo'shildi: ${name} (+${formatCurrencyUZS(price, 'uz')})`
+                      );
+                      setTimeout(() => setSuccessBanner(null), 3500);
+                      setQuickBarModalOrder(null);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-[14px] bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold shadow transition-all cursor-pointer dark:bg-[#ffd60a] dark:text-black"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

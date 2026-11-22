@@ -142,7 +142,19 @@ export const translations: TranslationsRecord = {
       reportCopiedSuccess: "Отчет скопирован в буфер обмена!",
       botTokenLabel: "Bot Token (от @BotFather)",
       chatIdLabel: "Chat ID (канал или личный ID)",
-      addBarToOrder: "Чай / напитки к заказу"
+      addBarToOrder: "Чай / напитки к заказу",
+      selectedMaster: "Массажистка",
+      selectedService: "Процедура",
+      noOrdersYet: "Заказов пока нет",
+      clientTotalBill: "Итого к оплате клиентом",
+      massagePrice: "Массаж",
+      barItemsTitle: "Бар / Напитки",
+      barSubtotal: "Бар",
+      addBarQuick: "+ Добавить бар",
+      totalClientBill: "Итого к оплате",
+      barQuickPresets: "Напитки к заказу",
+      clientOrderNum: "Клиент",
+      clearBar: "Сбросить бар"
     }
   },
   uz: {
@@ -286,7 +298,19 @@ export const translations: TranslationsRecord = {
       reportCopiedSuccess: "Hisobot nusxalandi!",
       botTokenLabel: "Bot Token (@BotFather dan)",
       chatIdLabel: "Chat ID (kanal yoki shaxsiy ID)",
-      addBarToOrder: "Buyurtmaga choy / ichimlik qo'shish"
+      addBarToOrder: "Buyurtmaga choy / ichimlik qo'shish",
+      selectedMaster: "Massajistka",
+      selectedService: "Xizmat",
+      noOrdersYet: "Hozircha buyurtmalar yo'q",
+      clientTotalBill: "Mijoz to'laydigan jami summa",
+      massagePrice: "Massaj",
+      barItemsTitle: "Bar / Ichimliklar",
+      barSubtotal: "Bar",
+      addBarQuick: "+ Bar qo'shish",
+      totalClientBill: "Jami to'lov",
+      barQuickPresets: "Buyurtmaga ichimliklar",
+      clientOrderNum: "Mijoz",
+      clearBar: "Barni tozalash"
     }
   }
 };

@@ -366,13 +366,37 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
           </div>
 
           {/* Total Overview Box */}
-          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-between">
-            <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase">
-              {language === 'ru' ? 'Итоговая стоимость' : 'Umumiy summa'}:
-            </span>
-            <span className="font-mono text-lg font-black text-emerald-700 dark:text-emerald-400">
-              {formatCurrencyUZS(orderTotal, language)}
-            </span>
+          <div className="p-4 rounded-2xl bg-slate-100 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/10 space-y-2">
+            <div className="flex items-center justify-between text-xs text-slate-600 dark:text-white/70">
+              <span>{language === 'ru' ? 'Массаж / Процедура' : 'Massaj / Muolaja'}:</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-white">
+                {formatCurrencyUZS(massagePrice, language)}
+              </span>
+            </div>
+            {barTotal > 0 && (
+              <div className="flex items-center justify-between text-xs text-amber-700 dark:text-[#ffd60a]">
+                <span>{language === 'ru' ? 'Бар / Напитки' : 'Bar / Ichimliklar'}:</span>
+                <span className="font-mono font-bold">
+                  +{formatCurrencyUZS(barTotal, language)}
+                </span>
+              </div>
+            )}
+            <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+              <div>
+                <span className="text-xs font-black text-emerald-800 dark:text-[#30d158] uppercase tracking-wide block">
+                  {language === 'ru' ? 'Итого к оплате клиентом' : "Jami mijoz to'laydi"}:
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-white/50">
+                  {language === 'ru' ? '(Массаж + Бар)' : '(Massaj + Bar)'}
+                </span>
+              </div>
+              <span
+                data-testid="edit-order-total-bill"
+                className="font-mono text-xl sm:text-2xl font-black text-emerald-600 dark:text-[#30d158] whitespace-nowrap"
+              >
+                {formatCurrencyUZS(orderTotal, language)}
+              </span>
+            </div>
           </div>
 
           {/* Actions */}

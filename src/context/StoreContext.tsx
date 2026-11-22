@@ -7,6 +7,7 @@ import {
   DailyExpenses,
   BarSales,
   ServiceOrderItem,
+  OrderBarItem,
   OrderUpdatePayload,
   TelegramConfig,
   StaffMember,
@@ -103,7 +104,15 @@ export interface StoreContextType {
       serviceNameUz?: string;
       durationMinutes: number;
       price: number;
+      barItems?: OrderBarItem[];
+      notes?: string;
     }
+  ) => void;
+  addBarToOrder: (
+    date: string,
+    masterId: string,
+    orderId: string,
+    item: { name: string; price: number; nameUz?: string }
   ) => void;
   updateOrder: (date: string, currentMasterId: string, orderId: string, updates: OrderUpdatePayload) => void;
   removeOrder: (date: string, masterId: string, orderId: string) => void;
@@ -632,11 +641,28 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
         serviceNameUz?: string;
         durationMinutes: number;
         price: number;
+        barItems?: OrderBarItem[];
+        notes?: string;
       }
     ) => {
       updateRecords((prev) => {
         const { list, index } = ensureRecordExists(prev, date);
         const target = { ...list[index] };
+
+        const barItems = order.barItems && order.barItems.length > 0 ? order.barItems : undefined;
+        const barSum = (barItems || []).reduce((acc, it) => acc + (it.price || 0), 0);
+
+        if (barSum > 0) {
+          const currentBarRev = target.bar?.revenue || 0;
+          const currentItems = target.bar?.items || [];
+          const newItems = barItems!.map((b) => ({ name: b.name, price: b.price }));
+          target.bar = {
+            ...target.bar,
+            revenue: currentBarRev + barSum,
+            items: [...currentItems, ...newItems],
+          };
+        }
+
         target.masters = target.masters.map((m) => {
           if (m.id !== masterId) return m;
           const orderId = `ord-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
@@ -647,7 +673,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
             serviceNameUz: order.serviceNameUz || order.serviceName,
             durationMinutes: order.durationMinutes,
             price: order.price,
+            barItems,
             timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+            notes: order.notes,
           };
           const orders = [...(m.orders || []), newOrder];
           const clientSessions = [...(m.clientSessions || []), order.price];
@@ -669,6 +697,56 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
         return list;
       });
     },
+    [ensureRecordExists, updateRecords]
+  );
+
+  const addBarToOrder = useCallback(
+    (
+      date: string,
+      masterId: string,
+      orderId: string,
+      item: { name: string; price: number; nameUz?: string }
+    ) => {
+      updateRecords((prev) => {
+        const idx = prev.findIndex((r) => r.date === date);
+        if (idx < 0) return prev;
+        const list = [...prev];
+        const target = { ...list[idx] };
+
+        let orderFound = false;
+        target.masters = target.masters.map((m) => {
+          if (m.id !== masterId) return m;
+          const orders = (m.orders || []).map((o) => {
+            if (o.id !== orderId) return o;
+            orderFound = true;
+            const newBarItem: OrderBarItem = {
+              id: `bi-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+              name: item.name,
+              nameUz: item.nameUz || item.name,
+              price: item.price,
+            };
+            return {
+              ...o,
+              barItems: [...(o.barItems || []), newBarItem],
+            };
+          });
+          return { ...m, orders };
+        });
+
+        if (orderFound && item.price > 0) {
+          const currentBarRev = target.bar?.revenue || 0;
+          const currentItems = target.bar?.items || [];
+          target.bar = {
+            ...target.bar,
+            revenue: currentBarRev + item.price,
+            items: [...currentItems, { name: item.name, price: item.price }],
+          };
+        }
+
+        list[idx] = target;
+        return list;
+      });
+    },
     [updateRecords]
   );
 
@@ -683,6 +761,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
           if (m.id !== masterId) return m;
           const orderToRemove = (m.orders || []).find((o) => o.id === orderId);
           if (!orderToRemove) return m;
+
+          const removedBarSum = (orderToRemove.barItems || []).reduce((acc, it) => acc + (it.price || 0), 0);
+          if (removedBarSum > 0) {
+            const currentBarRev = target.bar?.revenue || 0;
+            target.bar = {
+              ...target.bar,
+              revenue: Math.max(0, currentBarRev - removedBarSum),
+            };
+          }
+
           const orders = (m.orders || []).filter((o) => o.id !== orderId);
           const clientSessions = [...(m.clientSessions || [])];
           const feeIdx = clientSessions.indexOf(orderToRemove.price);
@@ -1061,6 +1149,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
       deleteMaster,
       addClientSession,
       addOrder,
+      addBarToOrder,
       updateOrder,
       removeOrder,
       services,
@@ -1104,6 +1193,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
       deleteMaster,
       addClientSession,
       addOrder,
+      addBarToOrder,
       updateOrder,
       removeOrder,
       services,

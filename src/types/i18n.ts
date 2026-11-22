@@ -148,6 +148,18 @@ export interface PosTranslations {
   botTokenLabel?: string;
   chatIdLabel?: string;
   addBarToOrder?: string;
+  selectedMaster?: string;
+  selectedService?: string;
+  noOrdersYet?: string;
+  clientTotalBill?: string;
+  massagePrice?: string;
+  barItemsTitle?: string;
+  barSubtotal?: string;
+  addBarQuick?: string;
+  totalClientBill?: string;
+  barQuickPresets?: string;
+  clientOrderNum?: string;
+  clearBar?: string;
 }
 
 export interface TranslationDictionary {
