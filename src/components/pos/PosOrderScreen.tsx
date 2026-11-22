@@ -112,6 +112,8 @@ export const PosOrderScreen: React.FC = () => {
     master: MasterEntry;
     clientNum: number;
   } | null>(null);
+  const [quickBarCustomName, setQuickBarCustomName] = useState<string>('');
+  const [quickBarCustomPrice, setQuickBarCustomPrice] = useState<string>('20000');
 
   const [isAddMasterModalOpen, setIsAddMasterModalOpen] = useState(false);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
@@ -121,6 +123,16 @@ export const PosOrderScreen: React.FC = () => {
     master: MasterEntry;
   } | null>(null);
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
+
+  // Close Quick Bar Modal on Escape key
+  React.useEffect(() => {
+    if (!quickBarModalOrder) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setQuickBarModalOrder(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [quickBarModalOrder]);
 
   // Quick Bar & Cleaning inputs
   const [quickBarInput, setQuickBarInput] = useState<string>(
@@ -162,8 +174,9 @@ export const PosOrderScreen: React.FC = () => {
     }
   };
 
+  const parsedCustomPrice = Number(customPriceInput);
   const draftMassagePrice = selectedService.isCustom
-    ? Number(customPriceInput) || 350000
+    ? (!isNaN(parsedCustomPrice) && customPriceInput.trim() !== '' ? Math.max(0, parsedCustomPrice) : 350000)
     : selectedService.price;
   const draftBarTotal = draftBarItems.reduce((acc, it) => acc + (it.price || 0), 0);
   const draftClientTotalBill = draftMassagePrice + draftBarTotal;
@@ -174,8 +187,9 @@ export const PosOrderScreen: React.FC = () => {
       return;
     }
 
+    const parsedPrice = Number(customPriceInput);
     const price = selectedService.isCustom
-      ? Number(customPriceInput) || 350000
+      ? (!isNaN(parsedPrice) && customPriceInput.trim() !== '' ? Math.max(0, parsedPrice) : 350000)
       : selectedService.price;
 
     const serviceName = language === 'uz' ? selectedService.serviceNameUz : selectedService.serviceNameRu;
@@ -1269,7 +1283,9 @@ export const PosOrderScreen: React.FC = () => {
                                           key={b.id}
                                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[8px] bg-white dark:bg-[#1c1c1e] text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-white/10 text-[10px]"
                                         >
-                                          <span>☕️ {language === 'uz' && b.nameUz ? b.nameUz : b.name}</span>
+                                          <span className="max-w-[130px] sm:max-w-[180px] truncate" title={language === 'uz' && b.nameUz ? b.nameUz : b.name}>
+                                            ☕️ {language === 'uz' && b.nameUz ? b.nameUz : b.name}
+                                          </span>
                                           <span className="font-mono font-bold">
                                             +{formatCurrencyUZS(b.price, language)}
                                           </span>
@@ -1481,6 +1497,9 @@ export const PosOrderScreen: React.FC = () => {
           role="dialog"
           aria-modal="true"
           data-testid="quick-add-bar-order-modal"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setQuickBarModalOrder(null);
+          }}
           className="fixed inset-0 z-50 bg-slate-950/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
         >
           <div className="bg-white dark:bg-[#1c1c1e] text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-[26px] w-full max-w-md p-5 sm:p-6 shadow-2xl space-y-4 my-8 transition-colors">
@@ -1575,22 +1594,23 @@ export const PosOrderScreen: React.FC = () => {
                   type="text"
                   placeholder={language === 'ru' ? 'Название напитка' : "Ichimlik nomi"}
                   id="custom-order-bar-name"
+                  value={quickBarCustomName}
+                  onChange={(e) => setQuickBarCustomName(e.target.value)}
                   className="flex-1 px-3 py-2 bg-slate-50 border border-slate-300 rounded-[14px] text-xs text-slate-900 focus:outline-none focus:border-amber-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white"
                 />
                 <input
                   type="number"
                   placeholder="UZS"
-                  defaultValue="20000"
                   id="custom-order-bar-price"
+                  value={quickBarCustomPrice}
+                  onChange={(e) => setQuickBarCustomPrice(e.target.value)}
                   className="w-24 px-3 py-2 bg-slate-50 border border-slate-300 rounded-[14px] text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-amber-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white"
                 />
                 <button
                   type="button"
                   onClick={() => {
-                    const nameEl = document.getElementById('custom-order-bar-name') as HTMLInputElement;
-                    const priceEl = document.getElementById('custom-order-bar-price') as HTMLInputElement;
-                    const name = nameEl?.value?.trim() || (language === 'ru' ? 'Напиток' : 'Ichimlik');
-                    const price = Number(priceEl?.value) || 0;
+                    const name = quickBarCustomName.trim() || (language === 'ru' ? 'Напиток' : 'Ichimlik');
+                    const price = Number(quickBarCustomPrice) || 0;
                     if (price > 0) {
                       addBarToOrder(
                         selectedDate,
@@ -1603,6 +1623,8 @@ export const PosOrderScreen: React.FC = () => {
                           ? `Клиенту №${quickBarModalOrder.clientNum} добавлено: ${name} (+${formatCurrencyUZS(price, 'ru')})`
                           : `Mijoz №${quickBarModalOrder.clientNum}ga qo'shildi: ${name} (+${formatCurrencyUZS(price, 'uz')})`
                       );
+                      setQuickBarCustomName('');
+                      setQuickBarCustomPrice('20000');
                       setTimeout(() => setSuccessBanner(null), 3500);
                       setQuickBarModalOrder(null);
                     }

@@ -763,11 +763,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
           if (!orderToRemove) return m;
 
           const removedBarSum = (orderToRemove.barItems || []).reduce((acc, it) => acc + (it.price || 0), 0);
-          if (removedBarSum > 0) {
+          if (removedBarSum > 0 || (orderToRemove.barItems && orderToRemove.barItems.length > 0)) {
             const currentBarRev = target.bar?.revenue || 0;
+            let currentBarItems = [...(target.bar?.items || [])];
+            for (const bItem of (orderToRemove.barItems || [])) {
+              const idx = currentBarItems.findIndex(
+                (it) => (it.name === bItem.name || it.name === bItem.nameUz) && it.price === bItem.price
+              );
+              if (idx >= 0) {
+                currentBarItems.splice(idx, 1);
+              }
+            }
             target.bar = {
               ...target.bar,
               revenue: Math.max(0, currentBarRev - removedBarSum),
+              items: currentBarItems,
             };
           }
 
@@ -817,13 +827,34 @@ export const StoreProvider: React.FC<{ children: React.ReactNode; initialDate?: 
         if (!targetMaster) return prev;
 
         // Calculate bar items difference if any bar items were modified
-        const oldBarSum = (currentOrder.barItems || []).reduce((acc, it) => acc + (it.price || 0), 0);
-        const newBarSum =
-          updates.barItems !== undefined
-            ? updates.barItems.reduce((acc, it) => acc + (it.price || 0), 0)
-            : oldBarSum;
+        const oldBarItems = currentOrder.barItems || [];
+        const newBarItems = updates.barItems !== undefined ? updates.barItems : oldBarItems;
+        const oldBarSum = oldBarItems.reduce((acc, it) => acc + (it.price || 0), 0);
+        const newBarSum = newBarItems.reduce((acc, it) => acc + (it.price || 0), 0);
         const barDiff = newBarSum - oldBarSum;
-        if (barDiff !== 0) {
+
+        if (updates.barItems !== undefined) {
+          let currentBarItems = [...(target.bar?.items || [])];
+          // Remove old items of this order from target.bar.items
+          for (const oldIt of oldBarItems) {
+            const idx = currentBarItems.findIndex(
+              (it) => (it.name === oldIt.name || it.name === oldIt.nameUz) && it.price === oldIt.price
+            );
+            if (idx >= 0) {
+              currentBarItems.splice(idx, 1);
+            }
+          }
+          // Add new items of this order to target.bar.items
+          for (const newIt of newBarItems) {
+            currentBarItems.push({ name: newIt.name, price: newIt.price });
+          }
+          const currentBarRev = target.bar?.revenue || 0;
+          target.bar = {
+            ...target.bar,
+            revenue: Math.max(0, currentBarRev + barDiff),
+            items: currentBarItems,
+          };
+        } else if (barDiff !== 0) {
           const currentBarRev = target.bar?.revenue || 0;
           target.bar = {
             ...target.bar,

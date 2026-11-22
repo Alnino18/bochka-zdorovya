@@ -160,4 +160,71 @@ describe('Feature F18: Client Bar Items & Total Bill Calculation', () => {
       expect(screen.getByTestId('metric-bar-revenue')).toHaveTextContent('20 000');
     });
   });
+
+  describe('5. Order Removal & Updating Bar Items Invariant', () => {
+    it('properly cleans up bar items from daily shift when an order is deleted', () => {
+      render(<App initialDate="2026-11-19" />);
+
+      // Select Iro and add order with Tea (15 000)
+      fireEvent.click(screen.getByTestId('pos-masseur-chip-m-iro-19'));
+      fireEvent.click(screen.getByTestId('pos-service-btn-1-40'));
+      fireEvent.click(screen.getByTestId('pos-draft-bar-btn-tea'));
+      fireEvent.click(screen.getByTestId('pos-submit-order'));
+
+      expect(screen.getByTestId('metric-bar-revenue')).toHaveTextContent('15 000');
+
+      // Verify the order was added to Iro and find the undo button
+      const undoBtns = screen.getAllByTitle(/Отменить|Bekor qilish/);
+      // Click undo on the newest order
+      fireEvent.click(undoBtns[0]);
+
+      // Daily bar revenue should return to 0
+      expect(screen.getByTestId('metric-bar-revenue')).toHaveTextContent('0 UZS');
+      expect(screen.getByTestId('pos-bar-current-total')).toHaveTextContent('0 UZS');
+    });
+  });
+
+  describe('6. Zero-Priced Complimentary Massage with Bar Drinks', () => {
+    it('allows entering 0 UZS for custom promo massage without defaulting to 350 000 UZS', () => {
+      render(<App initialDate="2026-11-19" />);
+
+      // Select Iro
+      fireEvent.click(screen.getByTestId('pos-masseur-chip-m-iro-19'));
+
+      // Click custom amount button
+      fireEvent.click(screen.getByTestId('pos-custom-amount-btn'));
+
+      // Enter 0 in custom amount input
+      const customInput = screen.getByTestId('pos-custom-amount-input');
+      fireEvent.change(customInput, { target: { value: '0' } });
+
+      // Add Tea (15 000 UZS)
+      fireEvent.click(screen.getByTestId('pos-draft-bar-btn-tea'));
+
+      // Total bill should be 0 + 15 000 = 15 000 UZS (NOT 350 000 + 15 000 = 365 000 UZS)
+      const draftPrice = screen.getByTestId('pos-draft-price');
+      expect(draftPrice).toHaveTextContent('15 000');
+
+      // Submit order
+      fireEvent.click(screen.getByTestId('pos-submit-order'));
+      expect(screen.getByTestId('pos-order-success-banner')).toBeInTheDocument();
+      expect(screen.getByTestId('metric-bar-revenue')).toHaveTextContent('15 000');
+    });
+  });
+
+  describe('7. Quick Add Bar Modal Escape Dismiss and Custom Input', () => {
+    it('closes quick bar modal on Escape key press and supports controlled custom input', () => {
+      render(<App initialDate="2026-11-19" />);
+
+      // Open quick bar modal on ord-iro-19-1
+      fireEvent.click(screen.getByTestId('add-bar-to-order-btn-ord-iro-19-1'));
+      expect(screen.getByTestId('quick-add-bar-order-modal')).toBeInTheDocument();
+
+      // Press Escape key
+      fireEvent.keyDown(window, { key: 'Escape' });
+
+      // Modal should be closed
+      expect(screen.queryByTestId('quick-add-bar-order-modal')).toBeNull();
+    });
+  });
 });

@@ -94,7 +94,8 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalPrice = Number(priceInput) || order.price;
+    const parsedPrice = Number(priceInput);
+    const finalPrice = !isNaN(parsedPrice) && priceInput.trim() !== '' ? Math.max(0, parsedPrice) : order.price;
 
     updateOrder(selectedDate, currentMaster.id, order.id, {
       newMasterId: selectedMasterId,
