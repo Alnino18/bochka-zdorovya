@@ -126,4 +126,39 @@ describe('Feature F17: Day/Night (Light/Dark Mode) System & iOS Theme Design', (
     expect(screen.getByTestId('current-theme').textContent).toBe('dark');
     expect(localStorage.getItem('theme-mode')).toBe('dark');
   });
+
+  it('T1-F17-07: handles corrupted/invalid theme-mode in localStorage defaulting safely to light mode', () => {
+    localStorage.setItem('theme-mode', 'invalid-theme-xyz');
+
+    render(React.createElement(App, { initialDate: '2026-11-19' }));
+
+    // Should safely default to light mode
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    const toggleBtn = screen.getByTestId('theme-toggle-btn');
+    expect(toggleBtn.textContent).toContain('Ночь');
+  });
+
+  it('T1-F17-08: toggles multiple times consistently without desynchronizing localStorage or DOM', () => {
+    render(React.createElement(App, { initialDate: '2026-11-19' }));
+
+    const toggleBtn = screen.getByTestId('theme-toggle-btn');
+
+    // Cycle 1: Light -> Dark
+    act(() => { fireEvent.click(toggleBtn); });
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(localStorage.getItem('theme-mode')).toBe('dark');
+    expect(document.querySelector('meta[name="theme-color"]')?.getAttribute('content')).toBe('#000000');
+
+    // Cycle 2: Dark -> Light
+    act(() => { fireEvent.click(toggleBtn); });
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(localStorage.getItem('theme-mode')).toBe('light');
+    expect(document.querySelector('meta[name="theme-color"]')?.getAttribute('content')).toBe('#ffffff');
+
+    // Cycle 3: Light -> Dark
+    act(() => { fireEvent.click(toggleBtn); });
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(localStorage.getItem('theme-mode')).toBe('dark');
+    expect(document.querySelector('meta[name="theme-color"]')?.getAttribute('content')).toBe('#000000');
+  });
 });

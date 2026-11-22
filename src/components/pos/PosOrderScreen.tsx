@@ -824,7 +824,7 @@ export const PosOrderScreen: React.FC = () => {
               value={cleaningInput}
               onChange={handleCleaningChange}
               data-testid="input-cleaning-expense"
-              className="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-2xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-rose-500 dark:bg-slate-950 dark:border-slate-700 dark:text-white"
+              className="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-[14px] text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-rose-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white"
             />
           </div>
         </div>
@@ -834,12 +834,12 @@ export const PosOrderScreen: React.FC = () => {
       <section className="space-y-4" data-testid="pos-daily-breakdown-section">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <User className="w-5 h-5 text-emerald-600 dark:text-[#30d158]" />
             <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
               {t('pos.itemizedBreakdown')}
             </h3>
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-xs text-slate-500 dark:text-white/60">
             {masters.length} {language === 'ru' ? 'массажисток на смене' : 'massajistkalar smenada'}
           </span>
         </div>
@@ -849,7 +849,7 @@ export const PosOrderScreen: React.FC = () => {
           {masters.length === 0 ? (
             <div
               data-testid="empty-masters-placeholder"
-              className="col-span-full py-8 text-center text-slate-500 bg-slate-100 border border-slate-200 dark:bg-slate-900/40 dark:border-slate-800 rounded-3xl"
+              className="col-span-full py-8 text-center text-slate-500 dark:text-white/50 bg-slate-100 dark:bg-[#1c1c1e] border border-slate-200 dark:border-white/10 rounded-[22px]"
             >
               {language === 'ru'
                 ? 'Нет активных массажисток на текущую смену'
@@ -864,12 +864,12 @@ export const PosOrderScreen: React.FC = () => {
                 <div
                   key={master.id}
                   data-testid={`master-card-${master.id}`}
-                  className="bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 hover:border-emerald-500/50 rounded-3xl p-4 sm:p-5 shadow-sm dark:shadow-xl flex flex-col justify-between space-y-3.5 transition-all backdrop-blur-md"
+                  className="bg-white dark:bg-[#1c1c1e] border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/50 rounded-[24px] p-4 sm:p-5 shadow-sm dark:shadow-xl flex flex-col justify-between space-y-3.5 transition-all backdrop-blur-md"
                 >
                   {/* Masseur Card Header */}
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center font-black text-sm border border-emerald-200 dark:border-emerald-500/30 shadow-inner">
+                      <div className="w-10 h-10 rounded-[14px] bg-emerald-50 text-emerald-600 dark:bg-[#30d158]/20 dark:text-[#30d158] flex items-center justify-center font-black text-sm border border-emerald-200 dark:border-[#30d158]/30 shadow-inner">
                         {displayName.charAt(0)}
                       </div>
                       <div>
@@ -881,7 +881,7 @@ export const PosOrderScreen: React.FC = () => {
                         </h4>
                         <div
                           data-testid={`master-clients-${master.id}`}
-                          className="text-xs font-bold text-emerald-600 dark:text-emerald-300"
+                          className="text-xs font-bold text-emerald-600 dark:text-[#30d158]"
                         >
                           {master.clientCount} {language === 'ru' ? 'клиентов' : 'mijoz'}
                         </div>
@@ -893,7 +893,7 @@ export const PosOrderScreen: React.FC = () => {
                       onClick={() => handleDeleteMaster(master)}
                       data-testid={`delete-master-btn-${master.id}`}
                       title={t('journal.actions.delete')}
-                      className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-rose-400 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:text-white/50 dark:hover:text-rose-400 dark:hover:bg-white/10 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -901,26 +901,26 @@ export const PosOrderScreen: React.FC = () => {
 
                   {/* Itemized List of Massages Performed */}
                   <div className="space-y-1.5">
-                    <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-white/50">
                       {t('pos.performedServices')}:
                     </div>
 
                     {groupedOrders.length === 0 ? (
-                      <div className="text-xs text-slate-400 dark:text-slate-500 italic py-1">
+                      <div className="text-xs text-slate-400 dark:text-white/40 italic py-1">
                         {t('pos.noOrdersYet')}
                       </div>
                     ) : (
                       <div
                         data-testid={`pos-masseur-massages-${master.id}`}
-                        className="space-y-1 bg-slate-50 dark:bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80"
+                        className="space-y-1 bg-slate-50 dark:bg-[#2c2c2e] p-3 rounded-[16px] border border-slate-200 dark:border-white/5"
                       >
                         {groupedOrders.map((item) => (
                           <div
                             key={item.key}
                             className="flex items-center justify-between text-xs py-0.5"
                           >
-                            <span className="font-medium text-slate-800 dark:text-slate-200">
-                              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 mr-1.5">
+                            <span className="font-medium text-slate-800 dark:text-white/90">
+                              <span className="font-extrabold text-emerald-600 dark:text-[#30d158] mr-1.5">
                                 {item.count}x
                               </span>
                               <span>
@@ -930,7 +930,7 @@ export const PosOrderScreen: React.FC = () => {
                                   : ''}
                               </span>
                             </span>
-                            <span className="font-mono text-slate-500 dark:text-slate-400 text-[11px] ml-2">
+                            <span className="font-mono text-slate-500 dark:text-white/60 text-[11px] ml-2">
                               {formatCurrencyUZS(item.totalPrice, language)}
                             </span>
                           </div>
@@ -940,21 +940,21 @@ export const PosOrderScreen: React.FC = () => {
                   </div>
 
                   {/* Financial Breakdown: Revenue, Payout, Salon Share */}
-                  <div className="grid grid-cols-3 gap-2 py-2 px-3 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs">
+                  <div className="grid grid-cols-3 gap-2 py-2 px-3 rounded-[16px] bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 text-xs">
                     <div>
-                      <div className="text-[10px] text-slate-500 font-bold">
+                      <div className="text-[10px] text-slate-500 dark:text-white/60 font-bold">
                         {t('journal.masterRevenue')}
                       </div>
                       <div
                         data-testid={`master-revenue-${master.id}`}
-                        className="font-mono font-bold text-emerald-700 dark:text-emerald-300 mt-0.5 text-xs truncate"
+                        className="font-mono font-bold text-emerald-700 dark:text-[#30d158] mt-0.5 text-xs truncate"
                       >
                         {formatCurrencyUZS(master.revenue, language)}
                       </div>
                     </div>
 
                     <div>
-                      <div className="text-[10px] text-slate-500 font-bold">
+                      <div className="text-[10px] text-slate-500 dark:text-white/60 font-bold">
                         {t('journal.masterPayout')}
                       </div>
                       <div
@@ -966,7 +966,7 @@ export const PosOrderScreen: React.FC = () => {
                     </div>
 
                     <div>
-                      <div className="text-[10px] text-slate-500 font-bold">
+                      <div className="text-[10px] text-slate-500 dark:text-white/60 font-bold">
                         {t('journal.salonShare')}
                       </div>
                       <div
@@ -982,7 +982,7 @@ export const PosOrderScreen: React.FC = () => {
                   {master.orders && master.orders.length > 0 && (
                     <div className="pt-1">
                       <details className="text-xs group">
-                        <summary className="text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer select-none">
+                        <summary className="text-[11px] text-slate-500 dark:text-white/60 hover:text-slate-800 dark:hover:text-white cursor-pointer select-none">
                           {language === 'ru' ? 'История заказов смены (' : 'Smena buyurtmalari ('}
                           {master.orders.length})
                         </summary>
@@ -990,15 +990,15 @@ export const PosOrderScreen: React.FC = () => {
                           {master.orders.map((ord) => (
                             <div
                               key={ord.id}
-                              className="flex items-center justify-between bg-slate-100 dark:bg-slate-950/80 px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] gap-2"
+                              className="flex items-center justify-between bg-slate-100 dark:bg-[#2c2c2e] px-2.5 py-2 rounded-xl border border-slate-200 dark:border-white/5 text-[11px] gap-2"
                             >
                               <div className="truncate flex-1">
                                 {ord.timestamp && (
-                                  <span className="text-slate-400 dark:text-slate-500 mr-1 font-mono text-[10px]">
+                                  <span className="text-slate-400 dark:text-white/40 mr-1 font-mono text-[10px]">
                                     {ord.timestamp}
                                   </span>
                                 )}
-                                <span className="text-slate-800 dark:text-slate-300 font-medium">
+                                <span className="text-slate-800 dark:text-white/90 font-medium">
                                   {language === 'uz' && ord.serviceNameUz
                                     ? ord.serviceNameUz
                                     : ord.serviceName}
@@ -1010,7 +1010,7 @@ export const PosOrderScreen: React.FC = () => {
                                 )}
                               </div>
                               <div className="flex items-center gap-1.5 flex-shrink-0">
-                                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                                <span className="font-mono font-bold text-emerald-600 dark:text-[#30d158]">
                                   {formatCurrencyUZS(ord.price, language)}
                                 </span>
                                 <button
@@ -1018,7 +1018,7 @@ export const PosOrderScreen: React.FC = () => {
                                   onClick={() => setEditingOrder({ order: ord, master })}
                                   data-testid={`edit-order-btn-${ord.id}`}
                                   title={language === 'ru' ? 'Редактировать заказ' : 'Buyurtmani tahrirlash'}
-                                  className="text-slate-400 hover:text-emerald-600 p-1 rounded hover:bg-slate-200 dark:hover:text-emerald-400 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                  className="text-slate-400 hover:text-emerald-600 p-1 rounded hover:bg-slate-200 dark:hover:text-[#30d158] dark:hover:bg-white/10 transition-colors cursor-pointer"
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </button>
@@ -1026,7 +1026,7 @@ export const PosOrderScreen: React.FC = () => {
                                   type="button"
                                   onClick={() => removeOrder(selectedDate, master.id, ord.id)}
                                   title={t('pos.undoOrder')}
-                                  className="text-slate-400 hover:text-rose-500 p-1 rounded hover:bg-slate-200 dark:text-slate-500 dark:hover:text-rose-400 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                  className="text-slate-400 hover:text-rose-500 p-1 rounded hover:bg-slate-200 dark:text-white/50 dark:hover:text-rose-400 dark:hover:bg-white/10 transition-colors cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -1047,25 +1047,25 @@ export const PosOrderScreen: React.FC = () => {
       {/* SALON NET SUMMARY CARD */}
       <section
         data-testid="daily-summary-card"
-        className="bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-sm dark:shadow-2xl space-y-4 backdrop-blur-md transition-colors"
+        className="bg-white dark:bg-[#1c1c1e] border border-slate-200/80 dark:border-white/10 rounded-[26px] p-5 sm:p-6 shadow-sm dark:shadow-2xl space-y-4 backdrop-blur-md transition-colors"
       >
-        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
           <div className="flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <Wallet className="w-5 h-5 text-emerald-600 dark:text-[#30d158]" />
             <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
               {t('journal.summarySection')}
             </h3>
           </div>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-bold text-slate-500 dark:text-white/60">
             {summary.totalClients} {language === 'ru' ? 'клиентов' : 'mijoz'}
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
           {/* Total Clients */}
-          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-inner">
-            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 flex items-center gap-1">
-              <User className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <div className="bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 rounded-[18px] p-3 shadow-inner">
+            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-white/60 flex items-center gap-1">
+              <User className="w-3.5 h-3.5 text-emerald-600 dark:text-[#30d158]" />
               <span>{t('pos.clientsTotal')}</span>
             </div>
             <div
@@ -1077,36 +1077,36 @@ export const PosOrderScreen: React.FC = () => {
           </div>
 
           {/* Gross Service Revenue */}
-          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-inner">
-            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 flex items-center gap-1">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <div className="bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 rounded-[18px] p-3 shadow-inner">
+            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-white/60 flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-[#30d158]" />
               <span>{t('journal.grossServiceRevenue')}</span>
             </div>
             <div
               data-testid="metric-gross-service-revenue"
-              className="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-1 truncate font-mono"
+              className="text-sm font-black text-emerald-700 dark:text-[#30d158] mt-1 truncate font-mono"
             >
               {formatCurrencyUZS(summary.grossServiceRevenue, language)}
             </div>
           </div>
 
           {/* Bar Sales */}
-          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-inner">
-            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 flex items-center gap-1">
-              <Coffee className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          <div className="bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 rounded-[18px] p-3 shadow-inner">
+            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-white/60 flex items-center gap-1">
+              <Coffee className="w-3.5 h-3.5 text-amber-600 dark:text-[#ffd60a]" />
               <span>{t('journal.barSales')}</span>
             </div>
             <div
               data-testid="metric-bar-revenue"
-              className="text-sm font-black text-amber-700 dark:text-amber-300 mt-1 truncate font-mono"
+              className="text-sm font-black text-amber-700 dark:text-[#ffd60a] mt-1 truncate font-mono"
             >
               {formatCurrencyUZS(summary.barRevenue, language)}
             </div>
           </div>
 
           {/* Gross Total Revenue */}
-          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-inner">
-            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 flex items-center gap-1">
+          <div className="bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 rounded-[18px] p-3 shadow-inner">
+            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-white/60 flex items-center gap-1">
               <TrendingUp className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
               <span>{t('journal.totalGrossRevenue')}</span>
             </div>
@@ -1119,8 +1119,8 @@ export const PosOrderScreen: React.FC = () => {
           </div>
 
           {/* Cleaning Expense */}
-          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-inner">
-            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 flex items-center gap-1">
+          <div className="bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 rounded-[18px] p-3 shadow-inner">
+            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-white/60 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
               <span>{t('journal.cleaning')}</span>
             </div>
@@ -1133,8 +1133,8 @@ export const PosOrderScreen: React.FC = () => {
           </div>
 
           {/* Masseur Payouts */}
-          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-inner">
-            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 flex items-center gap-1">
+          <div className="bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 rounded-[18px] p-3 shadow-inner">
+            <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-white/60 flex items-center gap-1">
               <Scissors className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span>{t('journal.totalMasterPayouts')}</span>
             </div>
@@ -1147,14 +1147,14 @@ export const PosOrderScreen: React.FC = () => {
           </div>
 
           {/* Cash In Register (Gross Total - Cleaning) */}
-          <div className="bg-gradient-to-br from-emerald-50 to-slate-50 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-3 dark:from-emerald-950/30 dark:to-slate-950 shadow-inner">
-            <div className="text-[10px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-              <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <div className="bg-gradient-to-br from-emerald-50 to-slate-50 border border-emerald-200 dark:border-[#30d158]/30 rounded-[18px] p-3 dark:from-[#30d158]/10 dark:to-[#1c1c1e] shadow-inner">
+            <div className="text-[10px] font-extrabold uppercase text-emerald-700 dark:text-[#30d158] flex items-center gap-1">
+              <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-[#30d158]" />
               <span>{t('pos.netCash')}</span>
             </div>
             <div
               data-testid="metric-net-balance"
-              className="text-base font-black text-emerald-700 dark:text-emerald-400 mt-1 truncate font-mono"
+              className="text-base font-black text-emerald-700 dark:text-[#30d158] mt-1 truncate font-mono"
             >
               {formatCurrencyUZS(summary.netBalance, language)}
             </div>
@@ -1162,8 +1162,8 @@ export const PosOrderScreen: React.FC = () => {
         </div>
 
         {/* Bottom Banner: Net Salon Profit */}
-        <div className="bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
-          <div className="text-xs text-slate-600 dark:text-slate-400">
+        <div className="bg-slate-50 dark:bg-[#2c2c2e] border border-slate-200 dark:border-white/5 rounded-[20px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+          <div className="text-xs text-slate-600 dark:text-white/70">
             <span className="font-bold text-slate-900 dark:text-white mr-1.5">{t('journal.netSalonProfit')}:</span>
             <span>
               {language === 'ru'
@@ -1174,7 +1174,7 @@ export const PosOrderScreen: React.FC = () => {
 
           <div
             data-testid="metric-net-profit"
-            className="font-mono text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300"
+            className="font-mono text-lg sm:text-xl font-black text-emerald-700 dark:text-[#30d158]"
           >
             {formatCurrencyUZS(summary.netSalonProfit, language)}
           </div>

@@ -49,10 +49,13 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
       data-testid="add-booking-modal"
       className="fixed inset-0 z-50 bg-slate-950/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 transition-colors">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+      <div className="bg-white dark:bg-[#1c1c1e] text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-[26px] w-full max-w-md p-5 sm:p-6 shadow-2xl space-y-4 transition-colors">
+        {/* iOS Grabber Pill */}
+        <div className="w-10 h-1 bg-slate-300 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-1" />
+
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
           <h3 id="add-booking-title" className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <BookmarkPlus className="w-5 h-5 text-emerald-600 dark:text-teal-400" />
+            <BookmarkPlus className="w-5 h-5 text-emerald-600 dark:text-[#30d158]" />
             <span>{t('journal.addBooking')}</span>
           </h3>
           <button
@@ -60,16 +63,16 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
             onClick={onClose}
             data-testid="cancel-booking-btn"
             aria-label={t('journal.actions.cancel')}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-slate-700 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#2c2c2e] dark:hover:bg-[#3a3a3c] dark:text-white/70 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="booking-time" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="booking-time" className="block text-xs font-bold text-slate-700 dark:text-white/80 mb-1">
                 {t('journal.time')} *
               </label>
               <input
@@ -79,12 +82,12 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
                 data-testid="booking-time-input"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
+                className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#30d158]"
               />
             </div>
 
             <div>
-              <label htmlFor="booking-party" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="booking-party" className="block text-xs font-bold text-slate-700 dark:text-white/80 mb-1">
                 {t('journal.partySize')}
               </label>
               <input
@@ -95,13 +98,13 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
                 data-testid="booking-party-input"
                 value={partySize}
                 onChange={(e) => setPartySize(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
+                className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#30d158]"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="booking-phone" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="booking-phone" className="block text-xs font-bold text-slate-700 dark:text-white/80 mb-1">
               {t('journal.phone')} *
             </label>
             <input
@@ -112,12 +115,12 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+998 90 123 45 67"
-              className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
+              className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#30d158]"
             />
           </div>
 
           <div>
-            <label htmlFor="booking-client" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="booking-client" className="block text-xs font-bold text-slate-700 dark:text-white/80 mb-1">
               {t('journal.clientName')}
             </label>
             <input
@@ -127,12 +130,12 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               placeholder={language === 'ru' ? 'Имя клиента' : 'Mijoz ismi'}
-              className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
+              className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#30d158]"
             />
           </div>
 
           <div>
-            <label htmlFor="booking-notes" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="booking-notes" className="block text-xs font-bold text-slate-700 dark:text-white/80 mb-1">
               {t('journal.notes')}
             </label>
             <input
@@ -142,7 +145,7 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder={language === 'ru' ? 'Пожелания, особенности' : 'Izohlar'}
-              className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
+              className="w-full bg-slate-50 border border-slate-300 text-sm text-slate-900 rounded-[14px] px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white dark:focus:border-[#30d158]"
             />
           </div>
 
@@ -150,14 +153,14 @@ export const AddBookingModal: React.FC<AddBookingModalProps> = ({ onClose }) => 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 border border-slate-200 dark:text-slate-400 dark:hover:text-white dark:border-slate-700 cursor-pointer"
+              className="px-4 py-2 rounded-[14px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-[#2c2c2e] dark:hover:bg-[#3a3a3c] text-xs font-semibold dark:text-white/80 transition-colors cursor-pointer"
             >
               {t('journal.actions.cancel')}
             </button>
             <button
               type="submit"
               data-testid="submit-booking-btn"
-              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all cursor-pointer active:scale-95"
+              className="px-5 py-2 rounded-[14px] bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#30d158] dark:hover:bg-[#28b84d] dark:text-black text-xs font-bold shadow-md transition-all cursor-pointer active:scale-95"
             >
               {t('journal.addBooking')}
             </button>

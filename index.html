@@ -24,12 +24,17 @@
       (function() {
         try {
           var saved = localStorage.getItem('theme-mode');
-          if (saved === 'dark') {
+          var isDark = saved === 'dark';
+          if (isDark) {
             document.documentElement.classList.add('dark');
             document.documentElement.style.colorScheme = 'dark';
           } else {
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
+          }
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute('content', isDark ? '#000000' : '#ffffff');
           }
         } catch (e) {}
       })();
@@ -50,14 +55,19 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at 50% 35%, #042f2e 0%, #022c22 45%, #0f172a 100%);
-            color: #f8fafc;
+            background: #ffffff;
+            color: #0f172a;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             padding: 24px 16px;
             box-sizing: border-box;
             z-index: 9999;
             text-align: center;
             overflow: hidden;
+            transition: background-color 0.2s, color 0.2s;
+          }
+          html.dark .splash-shell {
+            background: radial-gradient(circle at 50% 35%, #042f2e 0%, #022c22 45%, #0f172a 100%);
+            color: #f8fafc;
           }
           .splash-card {
             display: flex;
@@ -72,10 +82,16 @@
             width: 96px;
             height: 96px;
             margin-bottom: 20px;
-            filter: drop-shadow(0 12px 24px rgba(13, 148, 136, 0.35));
+            filter: drop-shadow(0 12px 24px rgba(5, 150, 105, 0.15));
             border-radius: 24px;
             padding: 4px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.08));
+            border: 1px solid rgba(16, 185, 129, 0.25);
+          }
+          html.dark .splash-logo-wrap {
+            filter: drop-shadow(0 12px 24px rgba(13, 148, 136, 0.35));
             background: linear-gradient(135deg, rgba(52, 211, 153, 0.4), rgba(13, 148, 136, 0.15));
+            border: none;
           }
           .splash-logo-svg {
             width: 100%;
@@ -88,19 +104,27 @@
             font-weight: 800;
             letter-spacing: 0.04em;
             margin: 0 0 4px 0;
-            background: linear-gradient(135deg, #ffffff 40%, #a7f3d0 100%);
+            background: linear-gradient(135deg, #0f172a 40%, #059669 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             line-height: 1.2;
+          }
+          html.dark .splash-title {
+            background: linear-gradient(135deg, #ffffff 40%, #a7f3d0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
           }
           .splash-subtitle {
             font-size: clamp(11px, 2.5vw, 13px);
             font-weight: 600;
             letter-spacing: 0.25em;
             text-transform: uppercase;
-            color: #5eead4;
+            color: #059669;
             margin: 0 0 16px 0;
             opacity: 0.95;
+          }
+          html.dark .splash-subtitle {
+            color: #5eead4;
           }
           .splash-divider {
             width: 48px;
@@ -118,11 +142,17 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
+            border: 3px solid rgba(16, 185, 129, 0.15);
+            border-top-color: #059669;
+            border-right-color: #10b981;
+            box-sizing: border-box;
+            animation: splash-spin 0.9s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+          }
+          html.dark .splash-spinner {
             border: 3px solid rgba(13, 148, 136, 0.2);
             border-top-color: #10b981;
             border-right-color: #34d399;
-            box-sizing: border-box;
-            animation: splash-spin 0.9s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
             box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
           }
           .splash-pulse-ring {
@@ -134,9 +164,12 @@
           }
           .splash-status-text {
             font-size: 13px;
-            color: #94a3b8;
+            color: #64748b;
             margin: 0 0 10px 0;
             letter-spacing: 0.02em;
+          }
+          html.dark .splash-status-text {
+            color: #94a3b8;
           }
           .splash-dots {
             display: inline-flex;

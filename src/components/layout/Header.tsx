@@ -109,17 +109,17 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               data-testid="theme-toggle-btn"
               aria-label={theme === 'dark' ? (language === 'ru' ? 'Включить светлую тему' : 'Yorug‘ rejimga o‘tish') : (language === 'ru' ? 'Включить тёмную тему' : 'Qorong‘i rejimga o‘tish')}
               title={theme === 'dark' ? (language === 'ru' ? '☀️ Светлая тема (День)' : '☀️ Yorug‘ rejim (Kun)') : (language === 'ru' ? '🌙 Тёмная тема (Ночь)' : '🌙 Qorong‘i rejim (Tun)')}
-              className="flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[12px] bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c1e] dark:hover:bg-[#2c2c2e] text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition-all shadow-sm active:scale-95 cursor-pointer font-bold text-xs"
+              className="flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[12px] bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c1e] dark:hover:bg-[#2c2c2e] text-slate-800 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition-all shadow-sm active:scale-95 cursor-pointer font-bold text-xs"
             >
               {theme === 'dark' ? (
                 <>
                   <Sun className="w-4 h-4 text-amber-400" />
-                  <span className="hidden sm:inline text-amber-300 text-[11px]">{language === 'ru' ? 'День' : 'Kun'}</span>
+                  <span className="text-amber-300 text-[11px] font-bold">{language === 'ru' ? 'День' : 'Kun'}</span>
                 </>
               ) : (
                 <>
                   <Moon className="w-4 h-4 text-slate-700" />
-                  <span className="hidden sm:inline text-slate-700 text-[11px]">{language === 'ru' ? 'Ночь' : 'Tun'}</span>
+                  <span className="text-slate-700 text-[11px] font-bold">{language === 'ru' ? 'Ночь' : 'Tun'}</span>
                 </>
               )}
             </button>

@@ -107,14 +107,14 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({ onClos
               rows={4}
               value={exportJson}
               data-testid="export-backup-textarea"
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-mono text-slate-800 focus:outline-none dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
+              className="w-full bg-slate-50 border border-slate-300 rounded-[14px] p-3 text-xs font-mono text-slate-900 focus:outline-none dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white"
             />
           )}
         </div>
 
         {/* Import Section */}
-        <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-          <label htmlFor="restore-json-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+        <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-white/10">
+          <label htmlFor="restore-json-input" className="block text-xs font-semibold text-slate-700 dark:text-white/80">
             {language === 'ru' ? 'Импорт резервной копии (JSON)' : 'Zaxira nusxasini import qilish (JSON)'}
           </label>
           <textarea
@@ -124,17 +124,17 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({ onClos
             onChange={(e) => setImportJson(e.target.value)}
             data-testid="restore-json-input"
             placeholder={language === 'ru' ? 'Вставьте сюда скопированный JSON...' : 'Bu yerga JSON nusxasini kiriting...'}
-            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-mono text-slate-900 focus:outline-none focus:border-emerald-500 dark:bg-slate-950 dark:border-slate-800 dark:text-white"
+            className="w-full bg-slate-50 border border-slate-300 rounded-[14px] p-3 text-xs font-mono text-slate-900 focus:outline-none focus:border-emerald-500 dark:bg-[#2c2c2e] dark:border-white/10 dark:text-white"
           />
           <button
             type="button"
             onClick={handleImport}
             data-testid="import-backup-btn"
             disabled={!importJson.trim()}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-xs font-bold transition-all ${
               importJson.trim()
                 ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm cursor-pointer'
-                : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed'
+                : 'bg-slate-200 text-slate-400 dark:bg-white/10 dark:text-white/30 cursor-not-allowed'
             }`}
           >
             <Upload className="w-3.5 h-3.5" />
@@ -143,15 +143,15 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({ onClos
         </div>
 
         {/* Factory Reset Section */}
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
-          <span className="text-xs text-slate-500">
+        <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex justify-between items-center">
+          <span className="text-xs text-slate-500 dark:text-white/50">
             {language === 'ru' ? 'Сброс базы до эталона' : 'Bazani boshlang\'ich holatga qaytarish'}
           </span>
           <button
             type="button"
             onClick={handleReset}
             data-testid="reset-baseline-btn"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-950/70 dark:text-rose-400 dark:border-rose-900 text-xs font-semibold transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-[12px] bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-950/70 dark:text-rose-400 dark:border-rose-900 text-xs font-bold transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{language === 'ru' ? 'Сбросить' : 'Qaytarish'}</span>
